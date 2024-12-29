@@ -7,14 +7,20 @@ export const signup = async (req, res) => {
 
     //checks
     if (!fullname || !username || !password || !confirmPassword)
-      return res.status(400).json({ message: "All fields are required" });
+      return res
+        .status(400)
+        .json({ success: false, message: "All fields are required" });
 
     if (password !== confirmPassword)
-      return res.status(400).json({ message: "Passwords do not match" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Passwords do not match" });
 
     const user = await User.findOne({ username });
     if (user)
-      return res.status(400).json({ message: "Username already exists" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Username already exists" });
 
     //password hashing
     const salt = await bcrypt.genSalt(10);
@@ -40,6 +46,7 @@ export const signup = async (req, res) => {
       //jwt signature
       generateToken(newUser._id, res);
       res.status(201).json({
+        success: true,
         message: "User registered successfully",
         user: {
           _id: newUser._id,
@@ -49,16 +56,49 @@ export const signup = async (req, res) => {
         },
       });
     } else {
-      res.status(400).json({ message: "Invalid user data" });
+      res.status(400).json({ success: false, message: "Invalid user data" });
     }
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server Error, please try again later" });
   }
 };
-export const login = (req, res) => {
-  res.send("Login route");
+export const login = async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    //checks
+    if (!username || !password)
+      return res.status(400).json({ message: "All fields are required" });
+
+    const user = await User.findOne({ username });
+
+    if (!user || !(await bcrypt.compare(password, user.password)))
+      return res.status(400).json({ message: "Invalid credentials" });
+
+    //jwt signature
+    const token = generateToken(user._id, res);
+    res.status(200).json({
+      success: true,
+      message: "User logged in successfully",
+      user: {
+        _id: user._id,
+        fullname: user.fullname,
+        username: user.username,
+        profilePicture: user.profilePicture,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error, please try again later" });
+  }
 };
+
 export const logout = (req, res) => {
-  res.send("Logout route");
+  try {
+    res.clearCookie("token", {});
+    res.status(200).json({ success: true, message: "Logged out successfully" });
+  } catch (error) {
+    console.error("Error during logout:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
 };
