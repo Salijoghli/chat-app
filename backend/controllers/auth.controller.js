@@ -1,26 +1,25 @@
 import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import generateToken from "../utils/genToken.js";
+import { registerUserSchema } from "../../shared/userValidation.js";
 export const signup = async (req, res) => {
   try {
     const { fullname, username, password, confirmPassword, gender } = req.body;
 
-    //checks
-    if (!fullname || !username || !password || !confirmPassword)
-      return res
-        .status(400)
-        .json({ success: false, message: "All fields are required" });
+    const { error } = registerUserSchema.validate(req.body, {
+      abortEarly: false,
+    });
 
-    if (password !== confirmPassword)
-      return res
-        .status(400)
-        .json({ success: false, message: "Passwords do not match" });
+    if (error) {
+      const errors = error.details.map((err) => err.message);
+      return res.status(400).json({ success: false, message: errors });
+    }
 
     const user = await User.findOne({ username });
     if (user)
       return res
         .status(400)
-        .json({ success: false, message: "Username already exists" });
+        .json({ success: false, message: "Username is taken" });
 
     //password hashing
     const salt = await bcrypt.genSalt(10);
