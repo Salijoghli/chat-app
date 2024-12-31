@@ -5,102 +5,86 @@ import {
   validateRegisterUser,
   validateLoginUser,
 } from "../../shared/userValidation.js";
-export const signup = async (req, res) => {
-  try {
-    const { fullname, username, password, confirmPassword, gender } = req.body;
+import expressAsyncHandler from "express-async-handler";
+import { handleError } from "../utils/handleError.js";
 
-    //validate user data
-    const { error } = validateRegisterUser(req.body);
+export const signup = expressAsyncHandler(async (req, res) => {
+  const { fullname, username, password, confirmPassword, gender } = req.body;
 
-    if (error) {
-      const errors = error.details.map((err) => err.message);
-      return res.status(400).json({ success: false, message: errors });
-    }
+  //validate user data
+  const { error } = validateRegisterUser(req.body);
 
-    const user = await User.findOne({ username });
-    if (user)
-      return res
-        .status(400)
-        .json({ success: false, message: "Username is taken" });
-
-    //password hashing
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-    //create profile picture URL - it will make unique profile picture based on username
-    const profilePicture =
-      gender == "male"
-        ? `https://avatar.iran.liara.run/public/boy?username=${username}`
-        : `https://avatar.iran.liara.run/public/girl?username=${username}`;
-
-    const newUser = new User({
-      fullname,
-      username,
-      password: hashedPassword,
-      gender,
-      profilePicture,
-    });
-
-    //save user
-    if (newUser) {
-      await newUser.save();
-      //jwt signature
-      generateToken(newUser._id, res);
-      res.status(201).json({
-        success: true,
-        message: "User registered successfully",
-        user: {
-          _id: newUser._id,
-          fullname: newUser.fullname,
-          username: newUser.username,
-          profilePicture: newUser.profilePicture,
-        },
-      });
-    } else {
-      res.status(400).json({ success: false, message: "Invalid user data" });
-    }
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server Error, please try again later" });
+  if (error) {
+    const errors = error.details.map((err) => err.message);
+    handleError(res, 400, errors);
   }
-};
-export const login = async (req, res) => {
-  try {
-    const { username, password } = req.body;
 
-    //validate user data
-    const { error } = validateLoginUser(req.body);
+  const user = await User.findOne({ username });
+  if (user) handleError(res, 400, "Username already exists");
 
-    if (error) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Invalid credentials" });
-    }
+  //password hashing
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(password, salt);
 
-    const user = await User.findOne({ username });
+  //Profile picture URL - it will make unique profile picture based on username
+  const genderAvatars = {
+    male: `https://avatar.iran.liara.run/public/boy?username=${username}`,
+    female: `https://avatar.iran.liara.run/public/girl?username=${username}`,
+  };
 
-    if (!user || !(await bcrypt.compare(password, user.password)))
-      return res
-        .status(400)
-        .json({ success: false, message: "Invalid credentials" });
+  const profilePicture = genderAvatars[gender];
 
+  const newUser = new User({
+    fullname,
+    username,
+    password: hashedPassword,
+    gender,
+    profilePicture,
+  });
+
+  //save user
+  if (newUser) {
+    await newUser.save();
     //jwt signature
-    const token = generateToken(user._id, res);
-    res.status(200).json({
+    generateToken(newUser._id, res);
+    res.status(201).json({
       success: true,
-      message: "User logged in successfully",
+      message: "User registered successfully",
       user: {
-        _id: user._id,
-        fullname: user.fullname,
-        username: user.username,
-        profilePicture: user.profilePicture,
+        _id: newUser._id,
+        fullname: newUser.fullname,
+        username: newUser.username,
+        profilePicture: newUser.profilePicture,
       },
     });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server Error, please try again later" });
-  }
-};
+  } else handleError(res, 400, "User registration failed");
+});
+export const login = expressAsyncHandler(async (req, res) => {
+  const { username, password } = req.body;
+
+  //validate user data
+  const { error } = validateLoginUser(req.body);
+
+  if (error) handleError(res, 400, "Invalid credentials");
+
+  const user = await User.findOne({ username });
+
+  if (!user || !(await bcrypt.compare(password, user.password)))
+    handleError(res, 400, "Invalid credentials");
+
+  //jwt signature
+  const token = generateToken(user._id, res);
+  res.status(200).json({
+    success: true,
+    message: "User logged in successfully",
+    user: {
+      _id: user._id,
+      fullname: user.fullname,
+      username: user.username,
+      profilePicture: user.profilePicture,
+    },
+  });
+});
 
 export const logout = (req, res) => {
   try {
@@ -108,6 +92,6 @@ export const logout = (req, res) => {
     res.status(200).json({ success: true, message: "Logged out successfully" });
   } catch (error) {
     console.error("Error during logout:", error);
-    res.status(500).json({ success: false, message: "Internal server error" });
+    handleError(res, 500, "Internal server error");
   }
 };

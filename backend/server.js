@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import authRoutes from "./routes/auth.js";
 import { connectMongoDB } from "./db/connectMongoDB.js";
+import errorMiddleware from "./middleware/error.middleware.js";
 
 const app = express();
 
@@ -15,6 +16,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 app.use("/api/auth", authRoutes);
+
+//error handling middleware
+app.use(errorMiddleware);
 
 app.listen(PORT, () => {
   console.log("Server is running on port " + PORT);
