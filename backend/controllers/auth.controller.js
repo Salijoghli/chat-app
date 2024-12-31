@@ -1,14 +1,16 @@
 import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import generateToken from "../utils/genToken.js";
-import { registerUserSchema } from "../../shared/userValidation.js";
+import {
+  validateRegisterUser,
+  validateLoginUser,
+} from "../../shared/userValidation.js";
 export const signup = async (req, res) => {
   try {
     const { fullname, username, password, confirmPassword, gender } = req.body;
 
-    const { error } = registerUserSchema.validate(req.body, {
-      abortEarly: false,
-    });
+    //validate user data
+    const { error } = validateRegisterUser(req.body);
 
     if (error) {
       const errors = error.details.map((err) => err.message);
@@ -65,14 +67,22 @@ export const signup = async (req, res) => {
 export const login = async (req, res) => {
   try {
     const { username, password } = req.body;
-    //checks
-    if (!username || !password)
-      return res.status(400).json({ message: "All fields are required" });
+
+    //validate user data
+    const { error } = validateLoginUser(req.body);
+
+    if (error) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid credentials" });
+    }
 
     const user = await User.findOne({ username });
 
     if (!user || !(await bcrypt.compare(password, user.password)))
-      return res.status(400).json({ message: "Invalid credentials" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid credentials" });
 
     //jwt signature
     const token = generateToken(user._id, res);
