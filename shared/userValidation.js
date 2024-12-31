@@ -1,5 +1,6 @@
 import Joi from "joi";
 import passwordComplexity from "joi-password-complexity";
+import { validator } from "./validator.js";
 
 //instead of writing patterns for password validation, we can use joi-password-complexity library
 const passwordComplexityOptions = {
@@ -37,9 +38,6 @@ const loginUserSchema = Joi.object({
   username: nameSchema,
   password: passwordSchema,
 });
-
-const validator = (schema) => (payload) =>
-  schema.validate(payload, { abortEarly: false });
 
 export const validateRegisterUser = validator(registerUserSchema);
 export const validateLoginUser = validator(loginUserSchema);

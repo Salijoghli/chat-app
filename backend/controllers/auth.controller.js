@@ -6,7 +6,7 @@ import {
   validateLoginUser,
 } from "../../shared/userValidation.js";
 import expressAsyncHandler from "express-async-handler";
-import { handleError } from "../utils/handleError.js";
+import handleError from "../utils/handleError.js";
 
 export const signup = expressAsyncHandler(async (req, res) => {
   const { fullname, username, password, confirmPassword, gender } = req.body;
