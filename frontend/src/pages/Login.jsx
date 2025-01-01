@@ -1,40 +1,53 @@
-const Login = () => {
-  return (
-    <div className="flex flex-col items-center justify-center min-w-96 mx-auto ">
-      <div className="p-6 w-full bg-red-300 rounded-md bg-clip-padding backdrop-filter backdrop-blur-md bg-opacity-10 border border-gray-100 text-white">
-        <h1 className="text-3xl font-semibold text-center ">
-          Login
-          <span className="text-blue-500"> Chat App</span>
-        </h1>
+import { AuthForm } from "../components/AuthForm";
+import { Link } from "react-router-dom";
+import { TextInput } from "../components/TextInput";
+import { useState } from "react";
 
-        <form>
-          <div>
-            <label className="label p-2">
-              <span className="text-base label-text">Username</span>
-            </label>
-            <input
-              placeholder="Username"
-              className="input input-bordered w-full h-10"
-            />
-            <label className="label p-2">
-              <span className="text-base label-text">Password</span>
-            </label>
-            <input
-              type="password"
-              placeholder="Password"
-              className="input input-bordered w-full h-10"
-            />
-            <a
-              className="text-sm hover:underline hover:text-blue-600 mt-2 inline-block"
-              href="#"
-            >
-              Don&apos;t have an account?{" "}
-            </a>
-            <button className="btn btn-block btn-sm mt-2">Login</button>
-          </div>
-        </form>
-      </div>
-    </div>
+const defaultFormData = {
+  username: "",
+  password: "",
+};
+
+const Login = () => {
+  const [formData, setFormData] = useState(defaultFormData);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log(formData);
+  };
+
+  return (
+    <AuthForm>
+      <h1 className="text-3xl font-semibold text-center ">
+        Login
+        <span className="text-blue-500"> Chat App</span>
+      </h1>
+
+      <form onSubmit={handleSubmit}>
+        <TextInput
+          name="username"
+          onChange={handleChange}
+          value={formData.username}
+        />
+        <TextInput
+          name="password"
+          type="password"
+          onChange={handleChange}
+          value={formData.password}
+        />
+        <Link
+          className="text-sm hover:underline hover:text-blue-600 mt-2 inline-block"
+          to="/signup"
+        >
+          Don&apos;t have an account?{" "}
+        </Link>
+        <button className="btn btn-block btn-sm mt-2">Login</button>
+      </form>
+    </AuthForm>
   );
 };
 
