@@ -1,4 +1,6 @@
-export const TextInput = ({ name, type = "text", value, onChange }) => {
+import React from "react";
+
+const TextInput = React.forwardRef(({ name, type = "text", ...rest }, ref) => {
   const formattedName = name.charAt(0).toUpperCase() + name.slice(1);
   return (
     <>
@@ -6,13 +8,16 @@ export const TextInput = ({ name, type = "text", value, onChange }) => {
         <span className="text-base label-text">{formattedName}</span>
       </label>
       <input
-        placeholder={formattedName}
+        ref={ref}
         className="input input-bordered w-full h-10"
-        value={value}
         name={name}
-        onChange={onChange}
         type={type}
+        {...rest}
       />
     </>
   );
-};
+});
+
+TextInput.displayName = "TextInput";
+
+export { TextInput };

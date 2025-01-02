@@ -1,27 +1,31 @@
 import { Link } from "react-router-dom";
 import { AuthForm } from "../components/AuthForm";
 import { TextInput } from "../components/TextInput";
-import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { joiResolver } from "@hookform/resolvers/joi";
+import { registerUserSchema } from "../../../shared/userValidation";
 
 const defaultFormData = {
   fullname: "",
   username: "",
   password: "",
   confirmPassword: "",
-  gender: "male",
+  gender: "",
 };
 
 const Signup = () => {
-  const [formData, setFormData] = useState(defaultFormData);
+  const {
+    register,
+    handleSubmit: onSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: joiResolver(registerUserSchema),
+    defaultValues: defaultFormData,
+  });
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log(formData);
-  };
+  const handleSubmit = onSubmit((data) => {
+    console.log(data);
+  });
 
   return (
     <AuthForm>
@@ -29,31 +33,60 @@ const Signup = () => {
         SignUp <span className="text-blue-500"> Chat App</span>
       </h1>
 
-      <form onSubmit={handleSubmit}>
-        <TextInput
-          name="fullname"
-          onChange={handleChange}
-          value={formData.fullname}
-        />
-        <TextInput
-          name="username"
-          onChange={handleChange}
-          value={formData.username}
-        />
-        <TextInput
-          name="password"
-          type="password"
-          onChange={handleChange}
-          value={formData.password}
-        />
+      <form onSubmit={handleSubmit} className="flex flex-col justify-center ">
+        <TextInput name="fullname" {...register("fullname")} />
+        {errors.fullname && (
+          <p className="text-error text-sm mt-1">{errors.fullname.message}</p>
+        )}
+        <TextInput name="username" {...register("username")} />
+        {errors.username && (
+          <p className="text-error text-sm mt-1">{errors.username.message}</p>
+        )}
+        <TextInput name="password" type="password" {...register("password")} />
+        {errors.password && (
+          <p className="text-error text-sm mt-1">{errors.password.message}</p>
+        )}
         <TextInput
           name="confirmPassword"
           type="password"
-          onChange={handleChange}
-          value={formData.confirmPassword}
+          {...register("confirmPassword")}
         />
+        {errors.confirmPassword && (
+          <p className="text-error text-sm mt-1">
+            {errors.confirmPassword.message}
+          </p>
+        )}
+
+        <div className="flex items-center justify-center gap-8">
+          <label className="label cursor-pointer ">
+            <span className="label-text">Male </span>
+            <input
+              type="radio"
+              className="radio radio-primary mx-5"
+              name="gender"
+              value="male"
+              defaultChecked
+              {...register("gender")}
+            />
+          </label>
+
+          <label className="label cursor-pointer">
+            <span className="label-text">Female </span>
+            <input
+              type="radio"
+              className="radio radio-error mx-5"
+              name="gender"
+              value="female"
+              {...register("gender")}
+            />
+          </label>
+        </div>
+        {errors.gender && (
+          <p className="text-error text-sm mt-1">{errors.gender.message}</p>
+        )}
+
         <Link
-          className="text-sm hover:underline hover:text-blue-600 mt-2 inline-block"
+          className="text-sm hover:underline hover:text-blue-600 inline-block text-center my-2"
           to="/login"
         >
           Already have an account?{" "}
