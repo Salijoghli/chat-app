@@ -35,9 +35,10 @@ export const registerUserSchema = Joi.object({
   username: nameSchema.label("Username"),
   fullname: nameSchema.label("Fullname"),
   password: passwordSchema.label("Password"),
-  confirmPassword: Joi.string().valid(Joi.ref("password")).required().messages({
-    "any.only": "Passwords do not match",
+  confirmPassword: Joi.string().required().valid(Joi.ref("password")).messages({
     "any.required": "Confirm password is required",
+    "string.empty": "Confirm password is required",
+    "any.only": "Passwords do not match",
   }),
   gender: Joi.string().valid("male", "female").required().messages({
     "any.only": "Gender must be either male or female.",

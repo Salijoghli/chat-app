@@ -17,7 +17,8 @@ const Signup = () => {
   const {
     register,
     handleSubmit: onSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitted },
+    getValues,
   } = useForm({
     resolver: joiResolver(registerUserSchema),
     defaultValues: defaultFormData,
@@ -51,12 +52,21 @@ const Signup = () => {
           type="password"
           {...register("confirmPassword")}
         />
-        {errors.confirmPassword && (
-          <p className="text-error text-sm mt-1">
-            {errors.confirmPassword.message}
-          </p>
-        )}
 
+        {
+          // Show error messages only after form submission, in case the user hasn't entered the confirm password we show a different error message
+          isSubmitted && !getValues("confirmPassword") ? (
+            <p className="text-error text-sm mt-1">Password is required</p>
+          ) : (
+            errors.confirmPassword && (
+              <p className="text-error text-sm mt-1">
+                {errors.confirmPassword.message}
+              </p>
+            )
+          )
+        }
+
+        {/* Gender */}
         <div className="flex items-center justify-center gap-8">
           <label className="label cursor-pointer ">
             <span className="label-text">Male </span>
@@ -91,6 +101,7 @@ const Signup = () => {
         >
           Already have an account?{" "}
         </Link>
+
         <button className="btn btn-block btn-sm mt-2">Sign Up</button>
       </form>
     </AuthForm>
