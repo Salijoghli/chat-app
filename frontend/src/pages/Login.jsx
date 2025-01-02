@@ -33,10 +33,19 @@ const Login = () => {
       </h1>
 
       <form onSubmit={handleSubmit}>
-        <TextInput name="username" {...register("username")} />
+        <TextInput
+          name="username"
+          {...register("username")}
+          error={!!errors.username}
+        />
         {errors.username && <ErrorMessage message={errors.username.message} />}
 
-        <TextInput name="password" type="password" {...register("password")} />
+        <TextInput
+          name="password"
+          type="password"
+          {...register("password")}
+          error={!!errors.password}
+        />
         {errors.password && <ErrorMessage message={errors.password.message} />}
         <Link
           className="text-sm hover:underline hover:text-blue-600 mt-2 inline-block"
