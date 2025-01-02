@@ -22,7 +22,7 @@ const nameSchema = Joi.string().alphanum().min(4).max(30).required().messages({
   "string.alphanum": "{#label} should only contain letters and numbers.",
 });
 
-const registerUserSchema = Joi.object({
+export const registerUserSchema = Joi.object({
   username: nameSchema,
   fullname: nameSchema,
   password: passwordSchema,
@@ -34,7 +34,7 @@ const registerUserSchema = Joi.object({
   }),
 });
 
-const loginUserSchema = Joi.object({
+export const loginUserSchema = Joi.object({
   username: nameSchema,
   password: passwordSchema,
 });
