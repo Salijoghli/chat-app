@@ -11,26 +11,37 @@ const passwordComplexityOptions = {
   numeric: 1,
   symbol: 1,
   requirementCount: 4,
-  messages: {
-    requirementCount:
-      "Password must contain at least 1 lowercase letter, 1 uppercase letter, 1 number, and 1 special character.",
-  },
 };
-const passwordSchema = passwordComplexity(passwordComplexityOptions);
+
+const passwordSchema = passwordComplexity(passwordComplexityOptions).messages({
+  "string.base": "{#label} should be a string.",
+  "string.empty": "{#label} is required.",
+  "string.min": "{#label} must be at least {#min} characters long.",
+  "string.max": "{#label} must be no more than {#max} characters long.",
+  "string.pattern.base":
+    "{#label} must include at least one uppercase letter, one lowercase letter, one number, and one special character.",
+  "any.required": "{#label} is required.",
+});
 
 const nameSchema = Joi.string().alphanum().min(4).max(30).required().messages({
   "string.alphanum": "{#label} should only contain letters and numbers.",
+  "string.min": "{#label} must be at least 4 characters long.",
+  "string.max": "{#label} must be less than 30 characters.",
+  "any.required": "{#label} is required.",
+  "string.empty": "{#label} is required",
 });
 
 export const registerUserSchema = Joi.object({
-  username: nameSchema,
-  fullname: nameSchema,
-  password: passwordSchema,
+  username: nameSchema.label("Username"),
+  fullname: nameSchema.label("Fullname"),
+  password: passwordSchema.label("Password"),
   confirmPassword: Joi.string().valid(Joi.ref("password")).required().messages({
     "any.only": "Passwords do not match",
+    "any.required": "Confirm password is required",
   }),
   gender: Joi.string().valid("male", "female").required().messages({
-    "any.only": `"Gender" must be either male or female.`,
+    "any.only": "Gender must be either male or female.",
+    "any.required": "Gender is required",
   }),
 });
 
