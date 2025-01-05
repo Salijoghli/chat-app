@@ -5,6 +5,8 @@ import { useForm } from "react-hook-form";
 import { joiResolver } from "@hookform/resolvers/joi";
 import { loginUserSchema } from "../../../shared/userValidation";
 import { ErrorMessage } from "../components/ErrorMessage";
+import { useAuthStore } from "../store/useAuthStore";
+import { Loader2 } from "lucide-react";
 
 const defaultFormData = {
   username: "",
@@ -21,18 +23,15 @@ const Login = () => {
     defaultValues: defaultFormData,
   });
 
+  const { login, isLoggingIn } = useAuthStore();
+
   const handleSubmit = onSubmit((data) => {
-    console.log(data);
+    login(data);
   });
 
   return (
     <AuthForm>
-      <h1 className="text-3xl font-semibold text-center ">
-        Login
-        <span className="text-blue-500"> Chat App</span>
-      </h1>
-
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="space-y-6">
         <TextInput
           name="username"
           {...register("username")}
@@ -47,14 +46,30 @@ const Login = () => {
           error={!!errors.password}
         />
         {errors.password && <ErrorMessage message={errors.password.message} />}
-        <Link
-          className="text-sm hover:underline hover:text-blue-600 mt-2 inline-block"
-          to="/signup"
+
+        <button
+          type="submit"
+          className="btn btn-primary w-full"
+          disabled={isLoggingIn}
         >
-          Don&apos;t have an account?{" "}
-        </Link>
-        <button className="btn btn-block btn-sm mt-2">Login</button>
+          {isLoggingIn ? (
+            <>
+              <Loader2 className="h-5 w-5 animate-spin" />
+              Loading...
+            </>
+          ) : (
+            "Sign in"
+          )}
+        </button>
       </form>
+      <div className="text-center">
+        <p className="text-base-content/60">
+          Don&apos;t have an account?{" "}
+          <Link to="/signup" className="link link-primary">
+            Create account
+          </Link>
+        </p>
+      </div>
     </AuthForm>
   );
 };

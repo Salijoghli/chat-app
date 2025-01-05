@@ -6,7 +6,8 @@ import { joiResolver } from "@hookform/resolvers/joi";
 import { registerUserSchema } from "../../../shared/userValidation";
 import { ErrorMessage } from "../components/ErrorMessage";
 import { useEffect } from "react";
-
+import { useAuthStore } from "../store/useAuthStore";
+import { Loader2 } from "lucide-react";
 const defaultFormData = {
   fullname: "",
   username: "",
@@ -28,8 +29,10 @@ const Signup = () => {
   });
 
   const handleSubmit = onSubmit((data) => {
-    console.log(data);
+    signup(data);
   });
+
+  const { signup, isSigningUp } = useAuthStore();
 
   // Set focus on the first input field with an error
   useEffect(() => {
@@ -41,11 +44,7 @@ const Signup = () => {
 
   return (
     <AuthForm>
-      <h1 className="text-3xl font-semibold text-center ">
-        SignUp <span className="text-blue-500"> Chat App</span>
-      </h1>
-
-      <form onSubmit={handleSubmit} className="flex flex-col justify-center ">
+      <form onSubmit={handleSubmit} className="space-y-6">
         <TextInput
           name="fullname"
           {...register("fullname")}
@@ -115,15 +114,29 @@ const Signup = () => {
         </div>
         {errors.gender && <ErrorMessage message={errors.gender.message} />}
 
-        <Link
-          className="text-sm hover:underline hover:text-blue-600 inline-block text-center my-2"
-          to="/login"
+        <button
+          type="submit"
+          className="btn btn-primary w-full"
+          disabled={isSigningUp}
         >
-          Already have an account?{" "}
-        </Link>
-
-        <button className="btn btn-block btn-sm mt-2">Sign Up</button>
+          {isSigningUp ? (
+            <>
+              <Loader2 className="size-5 animate-spin" />
+              Loading...
+            </>
+          ) : (
+            "Create Account"
+          )}
+        </button>
       </form>
+      <div className="text-center">
+        <p className="text-base-content/60">
+          Already have an account?{" "}
+          <Link to="/login" className="link link-primary">
+            Sign in
+          </Link>
+        </p>
+      </div>
     </AuthForm>
   );
 };

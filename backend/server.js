@@ -5,6 +5,7 @@ import messageRoutes from "./routes/message.route.js";
 import usersRoutes from "./routes/users.route.js";
 import errorMiddleware from "./middleware/error.middleware.js";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 import { connectMongoDB } from "./db/connectMongoDB.js";
 
 const app = express();
@@ -22,6 +23,14 @@ app.use(express.urlencoded({ extended: false }));
 
 // It makes the cookies available in req.cookies
 app.use(cookieParser());
+
+//allow cors
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
 
 app.use("/api/auth", authRoutes);
 app.use("/api/message", messageRoutes);

@@ -95,3 +95,7 @@ export const logout = (req, res) => {
     handleError(res, 500, "Internal server error");
   }
 };
+
+export const auth = expressAsyncHandler(async (req, res) => {
+  res.status(200).json(req.user);
+});
