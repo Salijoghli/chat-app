@@ -7,22 +7,17 @@ import { Routes, Route } from "react-router-dom";
 import { PrivateRoute } from "./components/PrivateRoute";
 import { Navbar } from "./components/Navbar";
 import { Toaster } from "react-hot-toast";
-
 function App() {
-  // const { user, checkingStatus } = useAuthUser();
-
   return (
     <div>
-      {/* <Navbar /> */}
+      <Navbar />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-
         <Route path="/settings" element={<PrivateRoute />}>
           <Route index element={<SettingsPage />} />
         </Route>
-
         <Route path="/profile" element={<PrivateRoute />}>
           <Route index element={<Profile />} />
         </Route>

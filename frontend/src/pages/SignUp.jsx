@@ -8,6 +8,7 @@ import { ErrorMessage } from "../components/ErrorMessage";
 import { useEffect } from "react";
 import { useAuthStore } from "../store/useAuthStore";
 import { Loader2 } from "lucide-react";
+import toast from "react-hot-toast";
 const defaultFormData = {
   fullname: "",
   username: "",
@@ -40,11 +41,18 @@ const Signup = () => {
     if (firstError) setFocus(firstError);
   }, [setFocus, errors]);
 
+  // Show error toast if there are errors in the form
+  useEffect(() => {
+    if (isSubmitted && Object.keys(errors).length > 0) {
+      toast.error("Whoops! There was an error with your submission");
+    }
+  }, [isSubmitted, errors]);
+
   const isConfirmedPasswordError = isSubmitted && !watch("confirmPassword");
 
   return (
     <AuthForm>
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-3">
         <TextInput
           name="fullname"
           {...register("fullname")}

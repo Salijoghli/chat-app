@@ -3,13 +3,13 @@ import { AuthImage } from "../components/AuthImage";
 
 export const AuthForm = ({ children }) => {
   return (
-    <div className="h-screen grid lg:grid-cols-2">
+    <div className="mt-14 h-screen grid lg:grid-cols-2 align-center justify-center">
       {/* Left Side - Form */}
-      <div className="flex flex-col justify-center items-center p-6 sm:p-12">
-        <div className="w-full max-w-md space-y-8">
+      <div className="flex flex-col justify-center items-center p-6 sm:p-12 ">
+        <div className="w-full max-w-md space-y-6">
           {/* Logo */}
-          <div className="text-center mb-8">
-            <div className="flex flex-col items-center gap-2 group">
+          <div className="text-center">
+            <div className="flex flex-col items-center gap-1 group">
               <div
                 className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20
               transition-colors"

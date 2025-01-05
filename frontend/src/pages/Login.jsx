@@ -7,6 +7,8 @@ import { loginUserSchema } from "../../../shared/userValidation";
 import { ErrorMessage } from "../components/ErrorMessage";
 import { useAuthStore } from "../store/useAuthStore";
 import { Loader2 } from "lucide-react";
+import { useEffect } from "react";
+import toast from "react-hot-toast";
 
 const defaultFormData = {
   username: "",
@@ -17,11 +19,13 @@ const Login = () => {
   const {
     register,
     handleSubmit: onSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitted },
   } = useForm({
     resolver: joiResolver(loginUserSchema),
     defaultValues: defaultFormData,
   });
+
+  console.log(errors);
 
   const { login, isLoggingIn } = useAuthStore();
 
@@ -29,9 +33,16 @@ const Login = () => {
     login(data);
   });
 
+  // Show error toast if there are errors in the form
+  useEffect(() => {
+    if (isSubmitted && Object.keys(errors).length > 0) {
+      toast.error("Whoops! There was an error with your submission");
+    }
+  }, [isSubmitted, errors]);
+
   return (
     <AuthForm>
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-3">
         <TextInput
           name="username"
           {...register("username")}
