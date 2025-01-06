@@ -1,5 +1,5 @@
 import { AuthForm } from "../components/AuthForm";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { TextInput } from "../components/TextInput";
 import { useForm } from "react-hook-form";
 import { joiResolver } from "@hookform/resolvers/joi";
@@ -25,13 +25,17 @@ const Login = () => {
     defaultValues: defaultFormData,
   });
 
-  console.log(errors);
-
-  const { login, isLoggingIn } = useAuthStore();
-
+  const { authUser, login, isLoggingIn } = useAuthStore();
+  const navigate = useNavigate();
   const handleSubmit = onSubmit((data) => {
     login(data);
   });
+
+  useEffect(() => {
+    if (authUser) {
+      navigate("/");
+    }
+  }, [authUser, navigate]);
 
   // Show error toast if there are errors in the form
   useEffect(() => {
@@ -42,7 +46,7 @@ const Login = () => {
 
   return (
     <AuthForm>
-      <form onSubmit={handleSubmit} className="space-y-3">
+      <form onSubmit={handleSubmit} className="space-y-6">
         <TextInput
           name="username"
           {...register("username")}

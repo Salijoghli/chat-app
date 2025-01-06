@@ -1,11 +1,21 @@
 import { MessageSquare } from "lucide-react";
 import { AuthImage } from "../components/AuthImage";
+import classNames from "classnames";
 
-export const AuthForm = ({ children }) => {
+export const AuthForm = ({ children, mode = "login" }) => {
+  const isLogin = mode === "login";
   return (
-    <div className="mt-14 h-screen grid lg:grid-cols-2 align-center justify-center">
+    <div className="h-screen grid lg:grid-cols-2 align-center justify-center">
       {/* Left Side - Form */}
-      <div className="flex flex-col justify-center items-center p-6 sm:p-12 ">
+      <div
+        className={classNames(
+          "flex flex-col justify-center items-center p-6 sm:p-12",
+          {
+            "mt-0": isLogin,
+            "mt-16": !isLogin,
+          }
+        )}
+      >
         <div className="w-full max-w-md space-y-6">
           {/* Logo */}
           <div className="text-center">
@@ -16,8 +26,12 @@ export const AuthForm = ({ children }) => {
               >
                 <MessageSquare className="w-6 h-6 text-primary" />
               </div>
-              <h1 className="text-2xl font-bold mt-2">Welcome Back</h1>
-              <p className="text-base-content/60">Sign in to your account</p>
+              <h1 className="text-2xl font-bold mt-2">
+                {isLogin ? "Welcome Back" : "Create an Account"}
+              </h1>
+              <p className="text-base-content/60">
+                {isLogin ? "Sign in to your account" : "Sign up to get started"}
+              </p>
             </div>
           </div>
 
@@ -25,8 +39,12 @@ export const AuthForm = ({ children }) => {
         </div>
       </div>
       <AuthImage
-        title={"Welcome"}
-        subtitle={"Connect and stay in touch with your loved ones."}
+        title={isLogin ? "Welcome" : "Join Us"}
+        subtitle={
+          isLogin
+            ? "Connect and stay in touch with your loved ones."
+            : "Start your journey with us and stay connected."
+        }
       />
     </div>
   );

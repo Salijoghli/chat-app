@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AuthForm } from "../components/AuthForm";
 import { TextInput } from "../components/TextInput";
 import { useForm } from "react-hook-form";
@@ -33,7 +33,9 @@ const Signup = () => {
     signup(data);
   });
 
-  const { signup, isSigningUp } = useAuthStore();
+  const { authUser, signup, isSigningUp } = useAuthStore();
+
+  const navigate = useNavigate();
 
   // Set focus on the first input field with an error
   useEffect(() => {
@@ -48,11 +50,17 @@ const Signup = () => {
     }
   }, [isSubmitted, errors]);
 
+  useEffect(() => {
+    if (authUser) {
+      navigate("/");
+    }
+  }, [authUser, navigate]);
+
   const isConfirmedPasswordError = isSubmitted && !watch("confirmPassword");
 
   return (
-    <AuthForm>
-      <form onSubmit={handleSubmit} className="space-y-3">
+    <AuthForm mode="signup">
+      <form onSubmit={handleSubmit} className="space-y-6">
         <TextInput
           name="fullname"
           {...register("fullname")}
