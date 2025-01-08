@@ -3,27 +3,15 @@ import passwordComplexity from "joi-password-complexity";
 import { validator } from "./validator.js";
 
 //instead of writing patterns for password validation, we can use joi-password-complexity library
-const passwordComplexityOptions = {
-  min: 8,
-  max: 30,
-  lowerCase: 1,
-  upperCase: 1,
-  numeric: 1,
-  symbol: 1,
-  requirementCount: 4,
-};
-
-const passwordSchema = passwordComplexity(passwordComplexityOptions)
-  .label("Password")
-  .messages({
-    "string.base": "Password should be a string.",
-    "string.empty": "Password is required.",
-    "string.min": "Password must be at least {#min} characters long.",
-    "string.max": "Password must be no more than {#max} characters long.",
-    "string.pattern.base":
-      "Password must include at least one uppercase letter, one lowercase letter, one number, and one special character.",
-    "any.required": "Password is required.",
-  });
+const passwordSchema = passwordComplexity(undefined, "Password").messages({
+  "string.base": "Password should be a string.",
+  "string.empty": "Password is required.",
+  "string.min": "Password must be at least {#min} characters long.",
+  "string.max": "Password must be no more than {#max} characters long.",
+  "string.pattern.base":
+    "Password must include at least one uppercase letter, one lowercase letter, one number, and one special character.",
+  "any.required": "Password is required.",
+});
 
 const usernameSchema = Joi.string()
   .alphanum()
@@ -72,14 +60,8 @@ export const loginUserSchema = Joi.object({
 export const updateUserSchema = Joi.object({
   username: usernameSchema.optional(),
   email: emailSchema.optional(),
-  oldPassword: passwordSchema.optional(),
-  newPassword: passwordSchema.optional().when("oldPassword", {
-    is: Joi.exist(),
-    then: Joi.required(),
-    otherwise: Joi.forbidden().messages({
-      "any.required": "Old password is required to set a new password.",
-    }),
-  }),
+  oldPassword: passwordSchema.optional().allow(""),
+  newPassword: passwordSchema.optional().allow(""),
   profilePicture: Joi.string().uri().optional().messages({
     "string.uri": "Profile picture must be a valid URL",
   }),

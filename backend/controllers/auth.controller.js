@@ -8,7 +8,7 @@ import {
 } from "../../shared/userValidation.js";
 import expressAsyncHandler from "express-async-handler";
 import handleError from "../utils/handleError.js";
-import cloudinary from "..utils/cloudinary";
+import cloudinary from "../utils/cloudinary.js";
 
 export const signup = expressAsyncHandler(async (req, res) => {
   const { email, username, password, confirmPassword, gender } = req.body;
