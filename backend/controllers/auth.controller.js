@@ -8,6 +8,7 @@ import {
 } from "../../shared/userValidation.js";
 import expressAsyncHandler from "express-async-handler";
 import handleError from "../utils/handleError.js";
+import cloudinary from "..utils/cloudinary";
 
 export const signup = expressAsyncHandler(async (req, res) => {
   const { email, username, password, confirmPassword, gender } = req.body;
@@ -137,7 +138,12 @@ export const updateProfile = expressAsyncHandler(async (req, res) => {
     user.username = username;
   }
 
-  if (profilePicture) user.profilePicture = profilePicture;
+  if (profilePicture) {
+    const uploadedResponse = await cloudinary.uploader.upload(profilePicture, {
+      upload_preset: "dev_setups",
+    });
+    user.profilePicture = uploadedResponse.secure_url;
+  }
 
   if (gender) user.gender = gender;
 

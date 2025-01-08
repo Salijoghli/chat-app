@@ -31,7 +31,7 @@ function App() {
 
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/profile" element={<PrivateRoute />}>
-          <Route element={<Profile />} />
+          <Route index element={<Profile />} />
         </Route>
       </Routes>
       <Toaster />
