@@ -5,10 +5,16 @@ import toast from "react-hot-toast";
 export const useAuthStore = create((set) => ({
   authUser: null,
   isSigningUp: false,
+  isSignupError: false,
   isLoggingIn: false,
+  isLoggingInError: false,
   isUpdatingProfile: false,
+  isUpdatingProfileError: false,
   isCheckingAuth: true,
   onlineUsers: [],
+  setFieldStatus: (field, status) => {
+    set({ [field]: status });
+  },
 
   checkAuth: async () => {
     try {
@@ -30,7 +36,8 @@ export const useAuthStore = create((set) => ({
       set({ authUser: res.data });
       toast.success("Account created successfully");
     } catch (error) {
-      toast.error(error.response.data.message);
+      toast.error(error.response.data.message, { duration: 5000 });
+      set({ isSignupError: true });
     } finally {
       set({ isSigningUp: false });
     }
@@ -43,8 +50,8 @@ export const useAuthStore = create((set) => ({
       set({ authUser: res.data });
       toast.success("Logged in successfully");
     } catch (error) {
-      console.log(error);
-      toast.error(error.response.data.message);
+      toast.error(error.response.data.message, { duration: 5000 });
+      set({ isLoggingInError: true });
     } finally {
       set({ isLoggingIn: false });
     }
@@ -67,7 +74,7 @@ export const useAuthStore = create((set) => ({
       set({ authUser: res.data });
       toast.success("Profile updated successfully");
     } catch (error) {
-      console.log("error in update profile:", error);
+      console.log("error in update profile:", error.message);
       toast.error(error.response.data.message);
     } finally {
       set({ isUpdatingProfile: false });

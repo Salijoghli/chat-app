@@ -4,12 +4,13 @@ import generateToken from "../utils/genToken.js";
 import {
   validateRegisterUser,
   validateLoginUser,
+  validateUpdateUser,
 } from "../../shared/userValidation.js";
 import expressAsyncHandler from "express-async-handler";
 import handleError from "../utils/handleError.js";
 
 export const signup = expressAsyncHandler(async (req, res) => {
-  const { fullname, username, password, confirmPassword, gender } = req.body;
+  const { email, username, password, confirmPassword, gender } = req.body;
 
   //validate user data
   const { error } = validateRegisterUser(req.body);
@@ -19,8 +20,14 @@ export const signup = expressAsyncHandler(async (req, res) => {
     handleError(res, 400, errors);
   }
 
-  const user = await User.findOne({ username });
-  if (user) handleError(res, 400, "Username already exists");
+  const user = await User.findOne({
+    $or: [{ email }, { username }],
+  });
+
+  if (user) {
+    const field = user.email === email ? "Email" : "Username";
+    handleError(res, 400, `${field} already exists.`);
+  }
 
   //password hashing
   const salt = await bcrypt.genSalt(10);
@@ -35,7 +42,7 @@ export const signup = expressAsyncHandler(async (req, res) => {
   const profilePicture = genderAvatars[gender];
 
   const newUser = new User({
-    fullname,
+    email,
     username,
     password: hashedPassword,
     gender,
@@ -52,7 +59,7 @@ export const signup = expressAsyncHandler(async (req, res) => {
       message: "User registered successfully",
       user: {
         _id: newUser._id,
-        fullname: newUser.fullname,
+        email: newUser.email,
         username: newUser.username,
         profilePicture: newUser.profilePicture,
       },
@@ -60,26 +67,29 @@ export const signup = expressAsyncHandler(async (req, res) => {
   } else handleError(res, 400, "User registration failed");
 });
 export const login = expressAsyncHandler(async (req, res) => {
-  const { username, password } = req.body;
+  const { email, password } = req.body;
 
   //validate user data
   const { error } = validateLoginUser(req.body);
 
-  if (error) handleError(res, 400, "Invalid credentials");
+  if (error) {
+    const errors = error.details.map((err) => err.message);
+    handleError(res, 400, errors);
+  }
 
-  const user = await User.findOne({ username });
+  const user = await User.findOne({ email });
 
   if (!user || !(await bcrypt.compare(password, user.password)))
     handleError(res, 400, "Invalid credentials");
 
   //jwt signature
-  const token = generateToken(user._id, res);
+  generateToken(user._id, res);
   res.status(200).json({
     success: true,
     message: "User logged in successfully",
     user: {
       _id: user._id,
-      fullname: user.fullname,
+      email: user.email,
       username: user.username,
       profilePicture: user.profilePicture,
     },
@@ -98,4 +108,58 @@ export const logout = (req, res) => {
 
 export const auth = expressAsyncHandler(async (req, res) => {
   res.status(200).json(req.user);
+});
+
+export const updateProfile = expressAsyncHandler(async (req, res) => {
+  const { error } = validateUpdateUser(req.body);
+  if (error) {
+    const errors = error.details.map((err) => err.message);
+    handleError(res, 400, errors);
+  }
+  const { email, username, profilePicture, oldPassword, newPassword, gender } =
+    req.body;
+
+  // Find the user
+  const user = await User.findById(req.user._id);
+  if (!user) handleError(res, 404, "User not found");
+
+  // Check if email is being updated and ensure uniqueness
+  if (email && email !== user.email) {
+    const emailExists = await User.findOne({ email });
+    if (emailExists) handleError(res, 400, "Email already in use");
+    user.email = email;
+  }
+
+  // Check if username is being updated and ensure uniqueness
+  if (username && username !== user.username) {
+    const usernameExists = await User.findOne({ username });
+    if (usernameExists) handleError(res, 400, "Username already in use");
+    user.username = username;
+  }
+
+  if (profilePicture) user.profilePicture = profilePicture;
+
+  if (gender) user.gender = gender;
+
+  // Handle password update
+  if (newPassword) {
+    const isPasswordMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isPasswordMatch) handleError(res, 400, "Invalid current password");
+
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
+  }
+
+  await user.save();
+
+  res.status(200).json({
+    success: true,
+    message: "Profile updated successfully",
+    user: {
+      _id: user._id,
+      email: user.email,
+      username: user.username,
+      profilePicture: user.profilePicture,
+    },
+  });
 });

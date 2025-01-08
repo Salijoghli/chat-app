@@ -10,7 +10,7 @@ import { useAuthStore } from "../store/useAuthStore";
 import { Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
 const defaultFormData = {
-  fullname: "",
+  email: "",
   username: "",
   password: "",
   confirmPassword: "",
@@ -33,7 +33,8 @@ const Signup = () => {
     signup(data);
   });
 
-  const { authUser, signup, isSigningUp } = useAuthStore();
+  const { authUser, signup, isSigningUp, isSigningUpError, setFieldStatus } =
+    useAuthStore();
 
   const navigate = useNavigate();
 
@@ -46,7 +47,7 @@ const Signup = () => {
   // Show error toast if there are errors in the form
   useEffect(() => {
     if (isSubmitted && Object.keys(errors).length > 0) {
-      toast.error("Whoops! There was an error with your submission");
+      toast.error("Whoops! There was an error with your submission.");
     }
   }, [isSubmitted, errors]);
 
@@ -54,7 +55,11 @@ const Signup = () => {
     if (authUser) {
       navigate("/");
     }
-  }, [authUser, navigate]);
+
+    return () => {
+      setFieldStatus("isLoggingInError", false);
+    };
+  }, [authUser, navigate, setFieldStatus]);
 
   const isConfirmedPasswordError = isSubmitted && !watch("confirmPassword");
 
@@ -62,16 +67,17 @@ const Signup = () => {
     <AuthForm mode="signup">
       <form onSubmit={handleSubmit} className="space-y-6">
         <TextInput
-          name="fullname"
-          {...register("fullname")}
-          error={!!errors.fullname}
+          name="email"
+          type="email"
+          {...register("email")}
+          error={!!errors.email || isSigningUpError}
         />
-        {errors.fullname && <ErrorMessage message={errors.fullname.message} />}
+        {errors.email && <ErrorMessage message={errors.email.message} />}
 
         <TextInput
           name="username"
           {...register("username")}
-          error={!!errors.username}
+          error={!!errors.username || isSigningUpError}
         />
         {errors.username && <ErrorMessage message={errors.username.message} />}
 
@@ -79,7 +85,7 @@ const Signup = () => {
           name="password"
           type="password"
           {...register("password")}
-          error={!!errors.password}
+          error={!!errors.password || isSigningUpError}
         />
         {errors.password && <ErrorMessage message={errors.password.message} />}
 

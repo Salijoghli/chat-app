@@ -11,7 +11,7 @@ import { useEffect } from "react";
 import toast from "react-hot-toast";
 
 const defaultFormData = {
-  username: "",
+  email: "",
   password: "",
 };
 
@@ -25,7 +25,8 @@ const Login = () => {
     defaultValues: defaultFormData,
   });
 
-  const { authUser, login, isLoggingIn } = useAuthStore();
+  const { authUser, login, isLoggingIn, isLoggingInError, setFieldStatus } =
+    useAuthStore();
   const navigate = useNavigate();
   const handleSubmit = onSubmit((data) => {
     login(data);
@@ -35,7 +36,11 @@ const Login = () => {
     if (authUser) {
       navigate("/");
     }
-  }, [authUser, navigate]);
+
+    return () => {
+      setFieldStatus("isLoggingInError", false);
+    };
+  }, [authUser, navigate, setFieldStatus]);
 
   // Show error toast if there are errors in the form
   useEffect(() => {
@@ -48,17 +53,18 @@ const Login = () => {
     <AuthForm>
       <form onSubmit={handleSubmit} className="space-y-6">
         <TextInput
-          name="username"
-          {...register("username")}
-          error={!!errors.username}
+          name="email"
+          {...register("email")}
+          type="email"
+          error={!!errors.email || isLoggingInError}
         />
-        {errors.username && <ErrorMessage message={errors.username.message} />}
+        {errors.email && <ErrorMessage message={errors.email.message} />}
 
         <TextInput
           name="password"
           type="password"
           {...register("password")}
-          error={!!errors.password}
+          error={!!errors.password || isLoggingInError}
         />
         {errors.password && <ErrorMessage message={errors.password.message} />}
 
