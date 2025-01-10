@@ -8,7 +8,9 @@ import { ErrorMessage } from "../components/ErrorMessage";
 import { useEffect } from "react";
 import { useAuthStore } from "../store/useAuthStore";
 import { Loader2 } from "lucide-react";
+import { RadioButton } from "../components/RadioButton";
 import toast from "react-hot-toast";
+
 const defaultFormData = {
   email: "",
   username: "",
@@ -27,10 +29,6 @@ const Signup = () => {
   } = useForm({
     resolver: joiResolver(registerUserSchema),
     defaultValues: defaultFormData,
-  });
-
-  const handleSubmit = onSubmit((data) => {
-    signup(data);
   });
 
   const { authUser, signup, isSigningUp, isSigningUpError, setFieldStatus } =
@@ -65,7 +63,12 @@ const Signup = () => {
 
   return (
     <AuthForm mode="signup">
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form
+        onSubmit={onSubmit((data) => {
+          signup(data);
+        })}
+        className="space-y-6"
+      >
         <TextInput
           name="email"
           type="email"
@@ -109,31 +112,7 @@ const Signup = () => {
           )
         }
 
-        {/* Gender */}
-        <div className="flex items-center justify-center gap-8">
-          <label className="label cursor-pointer ">
-            <span className="label-text">Male </span>
-            <input
-              type="radio"
-              className="radio radio-primary mx-5"
-              name="gender"
-              value="male"
-              defaultChecked
-              {...register("gender")}
-            />
-          </label>
-
-          <label className="label cursor-pointer">
-            <span className="label-text">Female </span>
-            <input
-              type="radio"
-              className="radio radio-error mx-5"
-              name="gender"
-              value="female"
-              {...register("gender")}
-            />
-          </label>
-        </div>
+        <RadioButton name="gender" {...register("gender")} />
         {errors.gender && <ErrorMessage message={errors.gender.message} />}
 
         <button

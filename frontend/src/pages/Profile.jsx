@@ -6,13 +6,30 @@ import { useForm } from "react-hook-form";
 import { updateUserSchema } from "../../../shared/userValidation.js";
 import { TextInput } from "../components/TextInput";
 import { ErrorMessage } from "../components/ErrorMessage";
+import { RadioButton } from "../components/RadioButton";
+import { useEffect } from "react";
+import { Loader } from "lucide-react";
+import classNames from "classnames";
+import toast from "react-hot-toast";
 
 const Profile = () => {
-  const { authUser, isUpdatingProfile, isUpdatingProfileError, updateProfile } =
-    useAuthStore();
-  const [profile, setProfile] = useState(authUser);
+  const {
+    authUser,
+    isUpdatingProfile,
+    isUpdatingProfileError,
+    updateProfile,
+    setFieldStatus,
+  } = useAuthStore();
 
-  console.log(profile);
+  const buttonClass = classNames(
+    "w-full py-2.5 rounded-lg font-semibold transition-all duration-200",
+    {
+      "bg-primary text-white hover:bg-primary-focus": !isUpdatingProfile,
+      "bg-gray-300 text-gray-500 cursor-not-allowed": isUpdatingProfile,
+    }
+  );
+
+  const [profilePicture, setProfilePicture] = useState("");
 
   const {
     register,
@@ -20,27 +37,56 @@ const Profile = () => {
     formState: { errors },
   } = useForm({
     resolver: joiResolver(updateUserSchema),
+    defaultValues: {
+      email: authUser.email,
+      username: authUser.username,
+      oldPassword: "",
+      newPassword: "",
+      gender: authUser.gender,
+    },
   });
 
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("File size exceeds the limit of 5MB.");
+      return;
+    }
+
     const reader = new FileReader();
     reader.readAsDataURL(file);
-    reader.onload = () =>
-      setProfile((prevProfile) => ({
-        ...prevProfile,
-        profilePicture: reader.result,
-      }));
+    reader.onload = async () => setProfilePicture(reader.result);
   };
 
   const handleFormSubmit = handleSubmit((data) => {
-    updateProfile({ ...profile, ...data });
+    const updatedData = {
+      ...data,
+    };
+
+    if (profilePicture) updatedData.profilePicture = profilePicture;
+
+    updateProfile(updatedData);
   });
 
+  // Reset the error status when the component unmounts
+  useEffect(() => {
+    return () => {
+      setFieldStatus("isUpdatingProfileError", false);
+    };
+  }, [setFieldStatus]);
+
+  if (isUpdatingProfile) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Loader className="size-10 animate-spin" />
+      </div>
+    );
+  }
+
   return (
-    <div className="h-screen pt-20">
+    <div className="pt-20">
       <div className="max-w-2xl mx-auto px-4 py-8">
         <div className="bg-base-300 rounded-xl p-6 space-y-8">
           <div className="text-center">
@@ -50,7 +96,7 @@ const Profile = () => {
           <div className="flex flex-col items-center gap-4">
             <div className="relative">
               <img
-                src={profile.profilePicture || "/default-avatar.png"}
+                src={profilePicture || authUser.profilePicture}
                 alt="Profile"
                 className="size-32 rounded-full object-cover border-4 "
               />
@@ -80,7 +126,6 @@ const Profile = () => {
               name="email"
               type="email"
               {...register("email")}
-              value={profile.email}
               error={!!errors.email || isUpdatingProfileError}
             />
             {errors.email && <ErrorMessage message={errors.email.message} />}
@@ -88,7 +133,6 @@ const Profile = () => {
             <TextInput
               name="username"
               {...register("username")}
-              value={profile.username}
               error={!!errors.username || isUpdatingProfileError}
             />
             {errors.username && (
@@ -115,10 +159,11 @@ const Profile = () => {
               <ErrorMessage message={errors.newPassword.message} />
             )}
 
+            <RadioButton name="gender" {...register("gender")} />
             <button
               type="submit"
               disabled={isUpdatingProfile}
-              className="w-full py-2.5 bg-primary text-white rounded-lg font-semibold hover:bg-primary-focus transition-all duration-200"
+              className={buttonClass}
             >
               {isUpdatingProfile ? "Updating..." : "Save Changes"}
             </button>

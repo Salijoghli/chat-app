@@ -120,6 +120,10 @@ export const updateProfile = expressAsyncHandler(async (req, res) => {
   const { email, username, profilePicture, oldPassword, newPassword, gender } =
     req.body;
 
+  if ((oldPassword && !newPassword) || (newPassword && !oldPassword)) {
+    handleError(res, 400, "Both current and new passwords are required.");
+  }
+
   // Find the user
   const user = await User.findById(req.user._id);
   if (!user) handleError(res, 404, "User not found");
@@ -127,22 +131,25 @@ export const updateProfile = expressAsyncHandler(async (req, res) => {
   // Check if email is being updated and ensure uniqueness
   if (email && email !== user.email) {
     const emailExists = await User.findOne({ email });
-    if (emailExists) handleError(res, 400, "Email already in use");
+    if (emailExists) handleError(res, 400, "Email already in use.");
     user.email = email;
   }
 
   // Check if username is being updated and ensure uniqueness
   if (username && username !== user.username) {
     const usernameExists = await User.findOne({ username });
-    if (usernameExists) handleError(res, 400, "Username already in use");
+    if (usernameExists) handleError(res, 400, "Username already in use.");
     user.username = username;
   }
 
+  // Handle profile picture update
   if (profilePicture) {
-    const uploadedResponse = await cloudinary.uploader.upload(profilePicture, {
-      upload_preset: "dev_setups",
-    });
-    user.profilePicture = uploadedResponse.secure_url;
+    try {
+      const uploadedResponse = await cloudinary.uploader.upload(profilePicture);
+      user.profilePicture = uploadedResponse.secure_url;
+    } catch (err) {
+      handleError(res, 500, "Failed to upload profile picture.");
+    }
   }
 
   if (gender) user.gender = gender;
@@ -150,7 +157,7 @@ export const updateProfile = expressAsyncHandler(async (req, res) => {
   // Handle password update
   if (newPassword) {
     const isPasswordMatch = await bcrypt.compare(oldPassword, user.password);
-    if (!isPasswordMatch) handleError(res, 400, "Invalid current password");
+    if (!isPasswordMatch) handleError(res, 400, "Invalid current password.");
 
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(newPassword, salt);
@@ -160,12 +167,13 @@ export const updateProfile = expressAsyncHandler(async (req, res) => {
 
   res.status(200).json({
     success: true,
-    message: "Profile updated successfully",
+    message: "Profile updated successfully.",
     user: {
       _id: user._id,
       email: user.email,
       username: user.username,
       profilePicture: user.profilePicture,
+      gender: user.gender,
     },
   });
 });

@@ -8,16 +8,8 @@ import { PrivateRoute } from "./components/PrivateRoute";
 import { Navbar } from "./components/Navbar";
 import { Toaster } from "react-hot-toast";
 import { useThemeStore } from "./store/useThemeStore";
-import { useAuthStore } from "./store/useAuthStore";
-import { useEffect } from "react";
 function App() {
   const { theme } = useThemeStore();
-  const { checkAuth } = useAuthStore();
-
-  useEffect(() => {
-    checkAuth();
-  }, [checkAuth]);
-
   return (
     <div data-theme={theme}>
       <Navbar />

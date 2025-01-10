@@ -27,10 +27,8 @@ const Login = () => {
 
   const { authUser, login, isLoggingIn, isLoggingInError, setFieldStatus } =
     useAuthStore();
+
   const navigate = useNavigate();
-  const handleSubmit = onSubmit((data) => {
-    login(data);
-  });
 
   useEffect(() => {
     if (authUser) {
@@ -51,7 +49,12 @@ const Login = () => {
 
   return (
     <AuthForm>
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form
+        onSubmit={onSubmit((data) => {
+          login(data);
+        })}
+        className="space-y-6"
+      >
         <TextInput
           name="email"
           {...register("email")}
