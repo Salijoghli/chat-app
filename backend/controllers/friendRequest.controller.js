@@ -60,8 +60,8 @@ export const acceptFriendRequest = expressAsyncHandler(async (req, res) => {
 
   if (request.status == "pending") {
     request.status = "accepted";
-    request.save(), console.log("aq vart");
     await Promise.all([
+      request.save(),
       User.findByIdAndUpdate(request.sender, {
         $addToSet: { friends: request.receiver },
       }),
