@@ -5,7 +5,12 @@ import classNames from "classnames";
 export const AuthForm = ({ children, mode = "login" }) => {
   const isLogin = mode === "login";
   return (
-    <div className="h-screen grid lg:grid-cols-2 align-center justify-center">
+    <div
+      className={classNames("grid lg:grid-cols-2 align-center justify-center", {
+        "h-screen": isLogin,
+        "min-h-screen": !isLogin,
+      })}
+    >
       {/* Left Side - Form */}
       <div
         className={classNames(

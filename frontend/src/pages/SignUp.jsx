@@ -112,7 +112,15 @@ const Signup = () => {
           )
         }
 
-        <RadioButton name="gender" {...register("gender")} />
+        <RadioButton
+          name="gender"
+          {...register("gender")}
+          defaultChecked="male"
+          options={[
+            { label: "Male", value: "male", styleClass: "radio-primary" },
+            { label: "Female", value: "female", styleClass: "radio-error" },
+          ]}
+        />
         {errors.gender && <ErrorMessage message={errors.gender.message} />}
 
         <button
