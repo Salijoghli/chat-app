@@ -36,7 +36,7 @@ const Login = () => {
     }
 
     return () => {
-      setFieldStatus("isLoggingInError", false);
+      useAuthStore.setState({ isLoggingInError: false });
     };
   }, [authUser, navigate, setFieldStatus]);
 

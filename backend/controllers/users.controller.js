@@ -10,7 +10,10 @@ export const getUsers = expressAsyncHandler(async (req, res) => {
     "-password"
   );
 
-  res.status(200).json(users);
+  res.status(200).json({
+    success: true,
+    users,
+  });
 });
 
 // Get a user by ID
@@ -20,7 +23,7 @@ export const getUser = expressAsyncHandler(async (req, res) => {
 
   if (!user) handleError(res, 404, "User not found.");
 
-  res.status(200).json({ success: true, data: user });
+  res.status(200).json({ success: true, user });
 });
 
 // Delete a friend

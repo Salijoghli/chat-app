@@ -63,6 +63,7 @@ export const signup = expressAsyncHandler(async (req, res) => {
         email: newUser.email,
         username: newUser.username,
         profilePicture: newUser.profilePicture,
+        friends: newUser.friends,
       },
     });
   } else handleError(res, 400, "User registration failed");
@@ -93,6 +94,7 @@ export const login = expressAsyncHandler(async (req, res) => {
       email: user.email,
       username: user.username,
       profilePicture: user.profilePicture,
+      friends: user.friends,
     },
   });
 });
@@ -174,6 +176,7 @@ export const updateProfile = expressAsyncHandler(async (req, res) => {
       username: user.username,
       profilePicture: user.profilePicture,
       gender: user.gender,
+      friends: user.friends,
     },
   });
 });

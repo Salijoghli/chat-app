@@ -8,9 +8,9 @@ import { TextInput } from "../components/TextInput";
 import { ErrorMessage } from "../components/ErrorMessage";
 import { RadioButton } from "../components/RadioButton";
 import { useEffect } from "react";
-import { Loader } from "lucide-react";
 import classNames from "classnames";
 import toast from "react-hot-toast";
+import { Loading } from "../components/Loading.jsx";
 
 const Profile = () => {
   const {
@@ -73,17 +73,11 @@ const Profile = () => {
   // Reset the error status when the component unmounts
   useEffect(() => {
     return () => {
-      setFieldStatus("isUpdatingProfileError", false);
+      useAuthStore.setState({ isUpdatingProfileError: false });
     };
   }, [setFieldStatus]);
 
-  if (isUpdatingProfile) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <Loader className="size-10 animate-spin" />
-      </div>
-    );
-  }
+  if (isUpdatingProfile) return <Loading />;
 
   return (
     <div className="pt-20">
