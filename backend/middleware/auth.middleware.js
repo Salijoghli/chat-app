@@ -10,7 +10,9 @@ const protect = expressAsyncHandler(async (req, res, next) => {
   const decoded = jwt.verify(token, process.env.JWT_SECRET);
   if (!decoded) handleError(res, 401, "Unauthorized - Invalid token");
 
-  const user = await User.findById(decoded.userId).select("-password");
+  const user = await User.findById(decoded.userId)
+    .select("-password")
+    .populate("friends", "_id username profilePicture");
   if (!user) handleError(res, 401, "Unauthorized - No user found");
   req.user = user;
 

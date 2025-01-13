@@ -1,64 +1,53 @@
-const Friends = () => {
-  // Placeholder data with profile pictures
-  const friends = [
-    {
-      id: 1,
-      name: "Alice",
-      requestId: 101,
-      profilePicture: "https://picsum.photos/50",
-    },
-    {
-      id: 2,
-      name: "Bob",
-      requestId: 102,
-      profilePicture: "https://picsum.photos/50",
-    },
-    {
-      id: 3,
-      name: "Charlie",
-      requestId: 103,
-      profilePicture: "https://picsum.photos/50",
-    },
-  ];
+import { useAuthStore } from "../store/useAuthStore";
+import { useChatStore } from "../store/useChatStore";
+import { useNavigate } from "react-router-dom";
 
-  // Simulate actions
-  const handleSendMessage = (friendId) => {
-    console.log(`Sent message to ID: ${friendId}`);
+const Friends = () => {
+  const { authUser } = useAuthStore();
+  const { setSelectedUser } = useChatStore();
+
+  const navigate = useNavigate();
+
+  const sendMessage = (friend) => {
+    setSelectedUser(friend);
+    navigate("/");
   };
 
   return (
     <div className="h-screen bg-base-200">
       <div className="flex items-center justify-center pt-20 px-4">
-        <div className="bg-base-100 rounded-lg shadow-cl w-full max-w-6xl">
+        <div className="bg-base-100 rounded-lg shadow-lg w-full max-w-6xl">
           <div className="p-4">
             {/* Friends Section */}
-            <div className="mb-8">
-              <h2 className="text-2xl font-semibold mb-4">Your Friends</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                {friends.map((friend) => (
-                  <div
-                    key={friend.id}
-                    className="card bg-base-200 shadow-md rounded-lg p-4"
-                  >
-                    <div className="flex items-center">
-                      <img
-                        src={friend.profilePicture}
-                        alt={friend.name}
-                        className="w-12 h-12 rounded-full mr-4"
-                      />
-                      <div>
-                        <h3 className="text-lg font-semibold">{friend.name}</h3>
-                        <button
-                          onClick={() => handleSendMessage(friend.id)}
-                          className="btn btn-primary mt-2"
-                        >
-                          Send Message
-                        </button>
-                      </div>
-                    </div>
+            <h2 className="text-2xl font-semibold mb-4">Your Friends</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              {authUser.friends.map((friend, index) => (
+                <div
+                  key={friend.id || index}
+                  className="card bg-base-200 shadow-md rounded-lg p-6 flex flex-col items-center text-center"
+                >
+                  <img
+                    src={friend.profilePicture}
+                    alt={friend.username}
+                    className="object-contain rounded-full"
+                  />
+                  <h3 className="text-lg font-semibold mb-2">{friend.name}</h3>
+                  <div className="flex gap-4">
+                    <button
+                      onClick={() => navigate(`/profile/${friend.id}`)}
+                      className="btn btn-primary mt-2"
+                    >
+                      Check Profile
+                    </button>
+                    <button
+                      onClick={() => sendMessage(friend)}
+                      className="btn btn-primary mt-2"
+                    >
+                      Send Message
+                    </button>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>

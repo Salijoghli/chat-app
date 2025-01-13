@@ -1,11 +1,9 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useChatStore } from "../store/useChatStore";
-import { SidebarSkeleton } from "../components/SidebarSkeleton";
 import { Users } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
 export const Sidebar = () => {
-  const { getUsers, selectedUser, setSelectedUser, isUsersLoading } =
-    useChatStore();
+  const { selectedUser, setSelectedUser } = useChatStore();
 
   const { authUser } = useAuthStore();
 
@@ -17,12 +15,6 @@ export const Sidebar = () => {
     ? authUser.friends.filter((user) => onlineUsers.includes(user._id))
     : authUser.friends;
 
-  useEffect(() => {
-    getUsers();
-  }, [getUsers]);
-
-  if (isUsersLoading) return <SidebarSkeleton />;
-
   return (
     <aside className="h-full w-20 lg:w-72 border-r border-base-300 flex flex-col transition-all duration-200">
       <div className="border-b border-base-300 w-full p-5">
@@ -30,7 +22,6 @@ export const Sidebar = () => {
           <Users className="size-6" />
           <span className="font-medium hidden lg:block">Contacts</span>
         </div>
-        {/* TODO: Online filter toggle */}
         <div className="mt-3 hidden lg:flex items-center gap-2">
           <label className="cursor-pointer flex items-center gap-2">
             <input
@@ -48,9 +39,9 @@ export const Sidebar = () => {
       </div>
 
       <div className="overflow-y-auto w-full py-3">
-        {filteredUsers.map((user) => (
+        {filteredUsers.map((user, index) => (
           <button
-            key={user._id}
+            key={user._id || index}
             onClick={() => setSelectedUser(user)}
             className={`
             w-full p-3 flex items-center gap-3
@@ -68,6 +59,7 @@ export const Sidebar = () => {
                 alt={user.username}
                 className="size-12 object-cover rounded-full"
               />
+
               {onlineUsers.includes(user._id) && (
                 <span
                   className="absolute bottom-0 right-0 size-3 bg-green-500 
