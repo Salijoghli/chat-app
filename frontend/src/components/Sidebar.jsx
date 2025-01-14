@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { useChatStore } from "../store/useChatStore";
-import { Users } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
-export const Sidebar = () => {
-  const { selectedUser, setSelectedUser } = useChatStore();
+import { Users } from "lucide-react";
 
-  const { authUser } = useAuthStore();
+export const Sidebar = () => {
+  const selectedUser = useChatStore((state) => state.selectedUser);
+  const setSelectedUser = useChatStore((state) => state.setSelectedUser);
+
+  const authUser = useAuthStore((state) => state.authUser);
 
   const [showOnlineOnly, setShowOnlineOnly] = useState(false);
 
@@ -57,7 +59,11 @@ export const Sidebar = () => {
               <img
                 src={user.profilePicture}
                 alt={user.username}
-                className="size-12 object-cover rounded-full"
+                className="size-12 object-cover rounded-full data-[loaded=false]:animate-pulse data-[loaded=false]:bg-gray-100/10"
+                data-loaded="false"
+                onLoad={(event) => {
+                  event.currentTarget.setAttribute("data-loaded", "true");
+                }}
               />
 
               {onlineUsers.includes(user._id) && (

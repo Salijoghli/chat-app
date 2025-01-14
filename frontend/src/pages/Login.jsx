@@ -25,20 +25,17 @@ const Login = () => {
     defaultValues: defaultFormData,
   });
 
-  const { authUser, login, isLoggingIn, isLoggingInError, setFieldStatus } =
-    useAuthStore();
+  const loading = useAuthStore((state) => state.loading.login);
+  const error = useAuthStore((state) => state.error.login);
+  const userLogin = useAuthStore((state) => state.userLogin);
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (authUser) {
-      navigate("/");
-    }
-
     return () => {
-      useAuthStore.setState({ isLoggingInError: false });
+      useAuthStore.setState((state) => ({ ...state.error, login: false }));
     };
-  }, [authUser, navigate, setFieldStatus]);
+  }, [navigate]);
 
   // Show error toast if there are errors in the form
   useEffect(() => {
@@ -51,7 +48,7 @@ const Login = () => {
     <AuthForm>
       <form
         onSubmit={onSubmit((data) => {
-          login(data);
+          userLogin(data);
         })}
         className="space-y-6"
       >
@@ -59,7 +56,7 @@ const Login = () => {
           name="email"
           {...register("email")}
           type="email"
-          error={!!errors.email || isLoggingInError}
+          error={!!errors.email || error}
         />
         {errors.email && <ErrorMessage message={errors.email.message} />}
 
@@ -67,16 +64,16 @@ const Login = () => {
           name="password"
           type="password"
           {...register("password")}
-          error={!!errors.password || isLoggingInError}
+          error={!!errors.password || error}
         />
         {errors.password && <ErrorMessage message={errors.password.message} />}
 
         <button
           type="submit"
           className="btn btn-primary w-full"
-          disabled={isLoggingIn}
+          disabled={loading}
         >
-          {isLoggingIn ? (
+          {loading ? (
             <>
               <Loader2 className="h-5 w-5 animate-spin" />
               Loading...

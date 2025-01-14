@@ -13,19 +13,16 @@ import toast from "react-hot-toast";
 import { Loading } from "../components/Loading.jsx";
 
 const Profile = () => {
-  const {
-    authUser,
-    isUpdatingProfile,
-    isUpdatingProfileError,
-    updateProfile,
-    setFieldStatus,
-  } = useAuthStore();
+  const authUser = useAuthStore((state) => state.authUser);
+  const loading = useAuthStore((state) => state.loading.updateProfile);
+  const error = useAuthStore((state) => state.error.updateProfile);
+  const updateProfile = useAuthStore((state) => state.updateProfile);
 
   const buttonClass = classNames(
     "w-full py-2.5 rounded-lg font-semibold transition-all duration-200",
     {
-      "bg-primary text-white hover:bg-primary-focus": !isUpdatingProfile,
-      "bg-gray-300 text-gray-500 cursor-not-allowed": isUpdatingProfile,
+      "bg-primary text-white hover:bg-primary-focus": !error,
+      "bg-gray-300 text-gray-500 cursor-not-allowed": error,
     }
   );
 
@@ -73,11 +70,14 @@ const Profile = () => {
   // Reset the error status when the component unmounts
   useEffect(() => {
     return () => {
-      useAuthStore.setState({ isUpdatingProfileError: false });
+      useAuthStore.setState((state) => ({
+        ...state.error,
+        updateProfile: false,
+      }));
     };
-  }, [setFieldStatus]);
+  }, []);
 
-  if (isUpdatingProfile) return <Loading />;
+  if (loading) return <Loading />;
 
   return (
     <div className="pt-20">
@@ -105,12 +105,12 @@ const Profile = () => {
                   className="hidden"
                   accept="image/*"
                   onChange={handleImageUpload}
-                  disabled={isUpdatingProfile}
+                  disabled={loading}
                 />
               </label>
             </div>
             <p className="text-sm text-zinc-400">
-              {isUpdatingProfile
+              {loading
                 ? "Uploading..."
                 : "Click the camera icon to update your photo"}
             </p>
@@ -120,14 +120,14 @@ const Profile = () => {
               name="email"
               type="email"
               {...register("email")}
-              error={!!errors.email || isUpdatingProfileError}
+              error={!!errors.email || error}
             />
             {errors.email && <ErrorMessage message={errors.email.message} />}
 
             <TextInput
               name="username"
               {...register("username")}
-              error={!!errors.username || isUpdatingProfileError}
+              error={!!errors.username || error}
             />
             {errors.username && (
               <ErrorMessage message={errors.username.message} />
@@ -137,7 +137,7 @@ const Profile = () => {
               name="oldPassword"
               type="password"
               {...register("oldPassword")}
-              error={!!errors.oldPassword || isUpdatingProfileError}
+              error={!!errors.oldPassword || error}
             />
             {errors.oldPassword && (
               <ErrorMessage message={errors.oldPassword.message} />
@@ -147,7 +147,7 @@ const Profile = () => {
               name="newPassword"
               type="password"
               {...register("newPassword")}
-              error={!!errors.newPassword || isUpdatingProfileError}
+              error={!!errors.newPassword || error}
             />
             {errors.newPassword && (
               <ErrorMessage message={errors.newPassword.message} />
@@ -162,12 +162,8 @@ const Profile = () => {
                 { label: "Female", value: "female", styleClass: "radio-error" },
               ]}
             />
-            <button
-              type="submit"
-              disabled={isUpdatingProfile}
-              className={buttonClass}
-            >
-              {isUpdatingProfile ? "Updating..." : "Save Changes"}
+            <button type="submit" disabled={loading} className={buttonClass}>
+              {loading ? "Updating..." : "Save Changes"}
             </button>
           </form>
         </div>

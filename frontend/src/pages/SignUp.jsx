@@ -31,8 +31,9 @@ const Signup = () => {
     defaultValues: defaultFormData,
   });
 
-  const { authUser, signup, isSigningUp, isSigningUpError, setFieldStatus } =
-    useAuthStore();
+  const loading = useAuthStore((state) => state.loading.signup);
+  const error = useAuthStore((state) => state.error.signup);
+  const signup = useAuthStore((state) => state.signup);
 
   const navigate = useNavigate();
 
@@ -49,15 +50,12 @@ const Signup = () => {
     }
   }, [isSubmitted, errors]);
 
+  // Clear the error state when the user navigates away from the page
   useEffect(() => {
-    if (authUser) {
-      navigate("/");
-    }
-
     return () => {
-      setFieldStatus("isLoggingInError", false);
+      useAuthStore.setState((state) => ({ ...state.error, signup: false }));
     };
-  }, [authUser, navigate, setFieldStatus]);
+  }, [navigate]);
 
   const isConfirmedPasswordError = isSubmitted && !watch("confirmPassword");
 
@@ -73,14 +71,14 @@ const Signup = () => {
           name="email"
           type="email"
           {...register("email")}
-          error={!!errors.email || isSigningUpError}
+          error={!!errors.email || error}
         />
         {errors.email && <ErrorMessage message={errors.email.message} />}
 
         <TextInput
           name="username"
           {...register("username")}
-          error={!!errors.username || isSigningUpError}
+          error={!!errors.username || error}
         />
         {errors.username && <ErrorMessage message={errors.username.message} />}
 
@@ -88,7 +86,7 @@ const Signup = () => {
           name="password"
           type="password"
           {...register("password")}
-          error={!!errors.password || isSigningUpError}
+          error={!!errors.password || error}
         />
         {errors.password && <ErrorMessage message={errors.password.message} />}
 
@@ -126,9 +124,9 @@ const Signup = () => {
         <button
           type="submit"
           className="btn btn-primary w-full"
-          disabled={isSigningUp}
+          disabled={loading}
         >
-          {isSigningUp ? (
+          {loading ? (
             <>
               <Loader2 className="size-5 animate-spin" />
               Loading...

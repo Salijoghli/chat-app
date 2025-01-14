@@ -3,21 +3,33 @@ import Signup from "./pages/SignUp";
 import Home from "./pages/Home";
 import SettingsPage from "./pages/SettingsPage";
 import Profile from "./pages/Profile";
-import { Routes, Route, Navigate } from "react-router-dom";
+import Friends from "./pages/Friends";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { Navbar } from "./components/Navbar";
 import { Toaster } from "react-hot-toast";
 import { useThemeStore } from "./store/useThemeStore";
 import { useAuthStore } from "./store/useAuthStore";
 import { useEffect } from "react";
 import { Loading } from "./components/Loading";
-import Friends from "./pages/Friends";
-function App() {
-  const { theme } = useThemeStore();
-  const { authUser, isCheckingAuth, checkAuth } = useAuthStore();
 
+// Routes that don't require authentication
+const auth = ["/login", "/signup"];
+
+function App() {
+  const theme = useThemeStore((state) => state.theme);
+
+  const authUser = useAuthStore((state) => state.authUser);
+  const isCheckingAuth = useAuthStore((state) => state.isCheckingAuth);
+  const checkAuth = useAuthStore((state) => state.checkAuth);
+
+  const location = useLocation();
+
+  // Check if the user is authenticated on every route change
   useEffect(() => {
-    checkAuth();
-  }, [checkAuth]);
+    if (!auth.includes(location.pathname)) {
+      checkAuth();
+    }
+  }, [checkAuth, authUser, location.pathname]);
 
   if (isCheckingAuth && !authUser) return <Loading />;
 

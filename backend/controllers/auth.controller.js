@@ -79,10 +79,7 @@ export const login = expressAsyncHandler(async (req, res) => {
     handleError(res, 400, errors);
   }
 
-  const user = await User.findOne({ email }).populate(
-    "friends",
-    "_id username profilePicture"
-  );
+  const user = await User.findOne({ email });
 
   if (!user || !(await bcrypt.compare(password, user.password)))
     handleError(res, 400, "Invalid credentials");
@@ -130,10 +127,7 @@ export const updateProfile = expressAsyncHandler(async (req, res) => {
   }
 
   // Find the user
-  const user = await User.findById(req.user._id).populate(
-    "friends",
-    "_id username profilePicture"
-  );
+  const user = await User.findById(req.user._id);
   if (!user) handleError(res, 404, "User not found");
 
   // Check if email is being updated and ensure uniqueness

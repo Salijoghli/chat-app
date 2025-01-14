@@ -14,7 +14,7 @@ export const AuthForm = ({ children, mode = "login" }) => {
       {/* Left Side - Form */}
       <div
         className={classNames(
-          "flex flex-col justify-center items-center p-6 sm:p-12",
+          "flex flex-col justify-center items-center p-6 sm:p-12 md:w-[800px] lg:w-full",
           {
             "mt-0": isLogin,
             "mt-16": !isLogin,

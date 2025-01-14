@@ -35,7 +35,7 @@ app.use(express.urlencoded({ extended: false }, { limit: "5mb" }));
 app.use(cookieParser());
 
 app.use("/api/auth", authRoutes);
-app.use("/api/message", messageRoutes);
+app.use("/api/messages", messageRoutes);
 app.use("/api/users", usersRoutes);
 app.use("/api/friends", friendRequestRoutes);
 

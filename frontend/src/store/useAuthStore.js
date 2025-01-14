@@ -1,27 +1,24 @@
 import { create } from "zustand";
 import { axiosInstance } from "../lib/axios.js";
+import { formatError } from "../utils/formatError.js";
 import toast from "react-hot-toast";
-
-const formatError = (error) => {
-  const errorMessage =
-    error.response?.data?.message ||
-    error.response?.statusText ||
-    "An error occurred. Please try again later.";
-  return errorMessage;
-};
 
 export const useAuthStore = create((set) => ({
   authUser: null,
-  isSigningUp: false,
-  isSignupError: false,
-  isLoggingIn: false,
-  isLoggingInError: false,
-  isUpdatingProfile: false,
-  isUpdatingProfileError: false,
-  isCheckingAuth: true,
-  onlineUsers: [],
+  loading: {
+    signup: false,
+    login: false,
+    updateProfile: false,
+  },
+  error: {
+    signup: false,
+    login: false,
+    updateProfile: false,
+  },
+  isCheckingAuth: false,
 
   checkAuth: async () => {
+    set({ isCheckingAuth: true });
     try {
       const res = await axiosInstance.get("/auth/user");
       set({ authUser: res.data });
@@ -33,30 +30,30 @@ export const useAuthStore = create((set) => ({
   },
 
   signup: async (data) => {
-    set({ isSigningUp: true });
+    set((state) => ({ loading: { ...state.loading, signup: true } }));
     try {
       const res = await axiosInstance.post("/auth/signup", data);
       set({ authUser: res.data.user });
       toast.success("Account created successfully");
     } catch (error) {
       toast.error(formatError(error), { duration: 5000 });
-      set({ isSignupError: true });
+      set((state) => ({ error: { ...state.error, signup: true } }));
     } finally {
-      set({ isSigningUp: false });
+      set((state) => ({ loading: { ...state.loading, signup: false } }));
     }
   },
 
-  login: async (data) => {
-    set({ isLoggingIn: true });
+  userLogin: async (data) => {
+    set((state) => ({ loading: { ...state.loading, login: true } }));
     try {
       const res = await axiosInstance.post("/auth/login", data);
       set({ authUser: res.data.user });
       toast.success("Logged in successfully");
     } catch (error) {
       toast.error(formatError(error), { duration: 5000 });
-      set({ isLoggingInError: true });
+      set((state) => ({ error: { ...state.error, login: true } }));
     } finally {
-      set({ isLoggingIn: false });
+      set((state) => ({ loading: { ...state.loading, login: false } }));
     }
   },
 
@@ -71,16 +68,16 @@ export const useAuthStore = create((set) => ({
   },
 
   updateProfile: async (data) => {
-    set({ isUpdatingProfile: true });
+    set((state) => ({ loading: { ...state.loading, updateProfile: true } }));
     try {
       const res = await axiosInstance.patch("/auth/update", data);
       set({ authUser: res.data.user });
       toast.success("Profile updated successfully");
     } catch (error) {
       toast.error(formatError(error), { duration: 5000 });
-      set({ isUpdatingProfileError: true });
+      set((state) => ({ loading: { ...state.error, updateProfile: true } }));
     } finally {
-      set({ isUpdatingProfile: false });
+      set((state) => ({ loading: { ...state.loading, updateProfile: false } }));
     }
   },
 }));
