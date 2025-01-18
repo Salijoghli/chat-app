@@ -6,10 +6,10 @@ import toast from "react-hot-toast";
 
 export const useChatStore = create((set, get) => ({
   selectedUser: null,
-  setSelectedUser: (user) => set({ selectedUser: user }),
   messages: [],
   loading: false,
   error: false,
+  setSelectedUser: (user) => set({ selectedUser: user }),
   getMessages: async () => {
     set({ loading: true });
     try {

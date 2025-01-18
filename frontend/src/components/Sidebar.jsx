@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useChatStore } from "../store/useChatStore";
 import { useAuthStore } from "../store/useAuthStore";
+import { useFriendsStore } from "../store/useFriendsStore";
 import { Users } from "lucide-react";
 
 export const Sidebar = () => {
@@ -11,7 +12,7 @@ export const Sidebar = () => {
 
   const [showOnlineOnly, setShowOnlineOnly] = useState(false);
 
-  const onlineUsers = [];
+  const onlineUsers = useFriendsStore((state) => state.onlineUsers);
 
   const filteredUsers = showOnlineOnly
     ? authUser.friends.filter((user) => onlineUsers.includes(user._id))
