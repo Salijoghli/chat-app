@@ -29,7 +29,7 @@ export const useAuthStore = create((set) => ({
     }
   },
 
-  signup: async (data) => {
+  userSignup: async (data) => {
     set((state) => ({ loading: { ...state.loading, signup: true } }));
     try {
       const res = await axiosInstance.post("/auth/signup", data);
@@ -67,7 +67,7 @@ export const useAuthStore = create((set) => ({
     }
   },
 
-  updateProfile: async (data) => {
+  updProfile: async (data) => {
     set((state) => ({ loading: { ...state.loading, updateProfile: true } }));
     try {
       const res = await axiosInstance.patch("/auth/update", data);

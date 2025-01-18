@@ -33,7 +33,7 @@ const Signup = () => {
 
   const loading = useAuthStore((state) => state.loading.signup);
   const error = useAuthStore((state) => state.error.signup);
-  const signup = useAuthStore((state) => state.signup);
+  const userSignup = useAuthStore((state) => state.userSignup);
 
   const navigate = useNavigate();
 
@@ -63,7 +63,7 @@ const Signup = () => {
     <AuthForm mode="signup">
       <form
         onSubmit={onSubmit((data) => {
-          signup(data);
+          userSignup(data);
         })}
         className="space-y-6"
       >

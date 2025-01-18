@@ -16,7 +16,7 @@ const Profile = () => {
   const authUser = useAuthStore((state) => state.authUser);
   const loading = useAuthStore((state) => state.loading.updateProfile);
   const error = useAuthStore((state) => state.error.updateProfile);
-  const updateProfile = useAuthStore((state) => state.updateProfile);
+  const updProfile = useAuthStore((state) => state.updProfile);
 
   const buttonClass = classNames(
     "w-full py-2.5 rounded-lg font-semibold transition-all duration-200",
@@ -64,7 +64,7 @@ const Profile = () => {
 
     if (profilePicture) updatedData.profilePicture = profilePicture;
 
-    updateProfile(updatedData);
+    updProfile(updatedData);
   });
 
   // Reset the error status when the component unmounts

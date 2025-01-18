@@ -24,12 +24,12 @@ function App() {
 
   const location = useLocation();
 
-  // Check if the user is authenticated on every route change
+  // // Check if the user is authenticated on every route change
   useEffect(() => {
     if (!auth.includes(location.pathname)) {
       checkAuth();
     }
-  }, [checkAuth, authUser, location.pathname]);
+  }, [location.pathname]);
 
   if (isCheckingAuth && !authUser) return <Loading />;
 

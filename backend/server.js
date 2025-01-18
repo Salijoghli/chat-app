@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import authRoutes from "./routes/auth.route.js";
 import messageRoutes from "./routes/message.route.js";
 import usersRoutes from "./routes/users.route.js";
-import friendRequestRoutes from "./routes/friendRequest.route.js";
+import friendsRoutes from "./routes/friends.route.js";
 import errorMiddleware from "./middleware/error.middleware.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
@@ -21,7 +21,7 @@ app.use(
   cors({
     origin: "http://localhost:5173",
     credentials: true,
-    methods: ["GET", "POST", "PATCH"],
+    methods: ["GET", "POST", "PATCH", "DELETE"],
   })
 );
 
@@ -37,7 +37,7 @@ app.use(cookieParser());
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/users", usersRoutes);
-app.use("/api/friends", friendRequestRoutes);
+app.use("/api/friends", friendsRoutes);
 
 //error handling middleware
 app.use(errorMiddleware);

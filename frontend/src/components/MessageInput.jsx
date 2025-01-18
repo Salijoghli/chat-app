@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useRef } from "react";
 import { handleImage } from "../utils/handleImage.js";
 import { useForm } from "react-hook-form";
 import { X, Image, Send } from "lucide-react";
