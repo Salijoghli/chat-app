@@ -2,28 +2,23 @@ import { useState } from "react";
 import { useChatStore } from "../store/useChatStore";
 import { useAuthStore } from "../store/useAuthStore";
 import { useFriendsStore } from "../store/useFriendsStore";
-import { Users } from "lucide-react";
 
 export const Sidebar = () => {
   const selectedUser = useChatStore((state) => state.selectedUser);
   const setSelectedUser = useChatStore((state) => state.setSelectedUser);
-
-  const authUser = useAuthStore((state) => state.authUser);
-
-  const [showOnlineOnly, setShowOnlineOnly] = useState(false);
-
   const onlineUsers = useFriendsStore((state) => state.onlineUsers);
+  const authUser = useAuthStore((state) => state.authUser);
+  const [showOnlineOnly, setShowOnlineOnly] = useState(false);
 
   const filteredUsers = showOnlineOnly
     ? authUser.friends.filter((user) => onlineUsers.includes(user._id))
     : authUser.friends;
 
   return (
-    <aside className="h-full w-20 lg:w-72 border-r border-base-300 flex flex-col transition-all duration-200">
+    <aside className="h-full w-30 lg:w-72 bg-base-200 flex flex-col transition-all duration-200 rounded-lg ">
       <div className="border-b border-base-300 w-full p-5">
         <div className="flex items-center gap-2">
-          <Users className="size-6" />
-          <span className="font-medium hidden lg:block">Contacts</span>
+          <p className="text-2xl font-bold">Chats</p>
         </div>
         <div className="mt-3 hidden lg:flex items-center gap-2">
           <label className="cursor-pointer flex items-center gap-2">
@@ -84,14 +79,6 @@ export const Sidebar = () => {
             </div>
           </button>
         ))}
-
-        {filteredUsers.length === 0 && showOnlineOnly ? (
-          <div className="text-center text-zinc-500 py-4">
-            No online friends
-          </div>
-        ) : filteredUsers.length === 0 ? (
-          <div className="text-center text-zinc-500 py-4">So Lonely</div>
-        ) : null}
       </div>
     </aside>
   );

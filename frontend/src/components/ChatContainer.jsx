@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect } from "react";
 import { ChatHeader } from "./ChatHeader";
 import { MessageInput } from "./MessageInput";
 import { useChatStore } from "../store/useChatStore";
@@ -15,7 +15,7 @@ export const ChatContainer = () => {
   }, [getMessages]);
 
   return (
-    <div className="flex-1 flex flex-col overflow-auto">
+    <div className="flex-1 flex flex-col overflow-auto bg-base-200 rounded-lg">
       <ChatHeader />
 
       {loading ? (

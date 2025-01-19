@@ -1,12 +1,12 @@
-import { X } from "lucide-react";
+import { Ellipsis } from "lucide-react";
 import { useChatStore } from "../store/useChatStore";
 import { useFriendsStore } from "../store/useFriendsStore";
+import { useLayoutStore } from "../store/useLayoutStore";
 
 export const ChatHeader = () => {
   const selectedUser = useChatStore((state) => state.selectedUser);
-  const setSelectedUser = useChatStore((state) => state.setSelectedUser);
   const onlineUsers = useFriendsStore((state) => state.onlineUsers);
-
+  const toggleChatInfo = useLayoutStore((state) => state.toggleChatInfo);
   return (
     <div className="p-2.5 border-b border-base-300">
       <div className="flex items-center justify-between">
@@ -31,8 +31,8 @@ export const ChatHeader = () => {
         </div>
 
         {/* Close button */}
-        <button onClick={() => setSelectedUser(null)}>
-          <X />
+        <button onClick={() => toggleChatInfo()}>
+          <Ellipsis />
         </button>
       </div>
     </div>

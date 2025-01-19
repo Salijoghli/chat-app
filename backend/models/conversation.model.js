@@ -13,6 +13,13 @@ const conversationSchema = new mongoose.Schema({
       default: [],
     },
   ],
+  pinnedMessages: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Message",
+      default: [],
+    },
+  ],
 });
 
 const Conversation = mongoose.model("Conversation", conversationSchema);
