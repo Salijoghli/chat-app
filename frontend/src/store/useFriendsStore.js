@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 export const useFriendsStore = create((set) => ({
   users: [],
   requests: [],
+  sentRequests: [],
   loading: {
     users: false,
     requests: false,
@@ -89,7 +90,6 @@ export const useFriendsStore = create((set) => ({
     }));
     try {
       await axiosInstance.post(`/friends/reject/${requestId}`);
-      console.log(requestId);
       set((state) => ({
         requests: state.requests.filter((request) => request._id !== requestId),
       }));
@@ -110,6 +110,11 @@ export const useFriendsStore = create((set) => ({
     }));
     try {
       await axiosInstance.post(`/friends/send/${userId}`);
+
+      set((state) => ({
+        sentRequest: [...state.sentRequests, { _id: userId }],
+      }));
+
       toast.success("Friend request sent");
     } catch (error) {
       toast.error(formatError(error), { duration: 5000 });
@@ -148,4 +153,36 @@ export const useFriendsStore = create((set) => ({
     }
   },
   // Cancel a friend request
+  cancelRequest: async (requestId) => {
+    set((state) => ({
+      loading: { ...state.loading, action: true, id: requestId },
+    }));
+    try {
+      await axiosInstance.delete(`/friends/cancel/${requestId}`);
+      set((state) => ({
+        requests: state.requests.filter((request) => request._id !== requestId),
+      }));
+      toast.success("Friend request canceled");
+    } catch (error) {
+      toast.error(formatError(error), { duration: 5000 });
+      set((state) => ({ error: { ...state.error, action: true } }));
+    } finally {
+      set((state) => ({
+        loading: { ...state.loading, action: false, id: null },
+      }));
+    }
+  },
+  // Get sent friend requests
+  getSentRequests: async () => {
+    set((state) => ({ loading: { ...state.loading, requests: true } }));
+    try {
+      const response = await axiosInstance.get("/friends/sent");
+      set({ sentRequests: response.data.requests });
+    } catch (error) {
+      set((state) => ({ error: { ...state.error, requests: true } }));
+      toast.error(formatError(error), { duration: 5000 });
+    } finally {
+      set((state) => ({ loading: { ...state.loading, requests: false } }));
+    }
+  },
 }));

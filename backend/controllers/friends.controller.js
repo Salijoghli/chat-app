@@ -143,3 +143,15 @@ export const deleteFriend = expressAsyncHandler(async (req, res) => {
   console.log("Friend deleted.");
   res.status(200).json({ success: true, message: "Friend deleted." });
 });
+
+// Get all sent requests for the user and populate the receiver field
+export const getSentRequests = expressAsyncHandler(async (req, res) => {
+  const userId = req.user._id;
+
+  const requests = await FriendRequest.find({
+    sender: userId,
+    status: "pending",
+  }).populate("receiver", "username ");
+
+  res.status(200).json({ success: true, requests });
+});
