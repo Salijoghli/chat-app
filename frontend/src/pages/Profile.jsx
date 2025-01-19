@@ -1,5 +1,4 @@
 import { useAuthStore } from "../store/useAuthStore";
-import { useState } from "react";
 import { Camera } from "lucide-react";
 import { joiResolver } from "@hookform/resolvers/joi";
 import { useForm } from "react-hook-form";
@@ -11,6 +10,7 @@ import { useEffect } from "react";
 import classNames from "classnames";
 import toast from "react-hot-toast";
 import { Loading } from "../components/Loading.jsx";
+import { handleImage } from "../utils/handleImage.js";
 
 const Profile = () => {
   const authUser = useAuthStore((state) => state.authUser);
@@ -26,12 +26,12 @@ const Profile = () => {
     }
   );
 
-  const [profilePicture, setProfilePicture] = useState("");
-
   const {
     register,
     handleSubmit,
     formState: { errors },
+    setValue,
+    watch,
   } = useForm({
     resolver: joiResolver(updateUserSchema),
     defaultValues: {
@@ -43,29 +43,20 @@ const Profile = () => {
     },
   });
 
-  const handleImageUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("File size exceeds the limit of 5MB.");
-      return;
+  const handleImageUpload = async (event) => {
+    try {
+      const picture = await handleImage(event);
+      setValue("profilePicture", picture);
+    } catch (error) {
+      toast.error(error);
     }
-
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = async () => setProfilePicture(reader.result);
   };
 
   const handleFormSubmit = handleSubmit((data) => {
-    const updatedData = {
-      ...data,
-    };
-
-    if (profilePicture) updatedData.profilePicture = profilePicture;
-
-    updProfile(updatedData);
+    updProfile(data);
   });
+
+  const profilePicture = watch("profilePicture");
 
   // Reset the error status when the component unmounts
   useEffect(() => {

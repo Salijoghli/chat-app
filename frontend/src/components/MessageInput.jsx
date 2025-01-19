@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { handleImage } from "../utils/handleImage.js";
 import { useForm } from "react-hook-form";
 import { X, Image, Send } from "lucide-react";
+import toast from "react-hot-toast";
 
 export const MessageInput = () => {
   const { register, setValue, handleSubmit, getValues, reset, watch } = useForm(
@@ -23,7 +24,7 @@ export const MessageInput = () => {
       const image = await handleImage(event);
       setValue("img", image);
     } catch (error) {
-      console.error(error);
+      toast.error(error);
     }
   };
 
