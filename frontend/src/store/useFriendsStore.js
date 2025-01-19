@@ -82,6 +82,28 @@ export const useFriendsStore = create((set) => ({
       }));
     }
   },
+  // Reject a friend request
+  rejectRequest: async (requestId) => {
+    set((state) => ({
+      loading: { ...state.loading, action: true, id: requestId },
+    }));
+    try {
+      await axiosInstance.post(`/friends/reject/${requestId}`);
+      console.log(requestId);
+      set((state) => ({
+        requests: state.requests.filter((request) => request._id !== requestId),
+      }));
+      toast.success("Friend request rejected");
+    } catch (error) {
+      toast.error(formatError(error), { duration: 5000 });
+      set((state) => ({ error: { ...state.error, action: true } }));
+    } finally {
+      set((state) => ({
+        loading: { ...state.loading, action: false, id: null },
+      }));
+    }
+  },
+  // send a friend request
   sendRequest: async (userId) => {
     set((state) => ({
       loading: { ...state.loading, action: true, id: userId },
@@ -98,6 +120,7 @@ export const useFriendsStore = create((set) => ({
       }));
     }
   },
+  // Remove a friend
   removeFriend: async (friendId) => {
     set((state) => ({
       loading: { ...state.loading, action: true, id: friendId },
@@ -124,4 +147,5 @@ export const useFriendsStore = create((set) => ({
       }));
     }
   },
+  // Cancel a friend request
 }));
