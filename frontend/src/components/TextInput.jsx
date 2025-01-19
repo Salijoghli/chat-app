@@ -8,6 +8,12 @@ const types = {
   text: User,
 };
 
+const autoComplete = {
+  email: "email",
+  password: "current-password",
+  text: "name",
+};
+
 const TextInput = React.forwardRef(
   ({ name, error, type = "text", ...rest }, ref) => {
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -22,7 +28,7 @@ const TextInput = React.forwardRef(
 
     return (
       <div className="form-control">
-        <label className="label">
+        <label className="label" htmlFor={name}>
           <span className="label-text font-medium">{formattedName}</span>
         </label>
 
@@ -31,10 +37,12 @@ const TextInput = React.forwardRef(
             <InputIcon className="h-5 w-5 text-base-content/40" />
           </div>
           <input
+            id={name}
             ref={ref}
             className={inputClass}
             name={name}
             type={type === "password" && isPasswordVisible ? "text" : type}
+            autoComplete={autoComplete[type]}
             placeholder={
               type === "password"
                 ? "••••••••"

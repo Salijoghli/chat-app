@@ -103,18 +103,19 @@ export const useFriendsStore = create((set) => ({
       }));
     }
   },
-  // send a friend request
+  // Send a friend request
   sendRequest: async (userId) => {
     set((state) => ({
       loading: { ...state.loading, action: true, id: userId },
     }));
     try {
-      await axiosInstance.post(`/friends/send/${userId}`);
-
+      const response = await axiosInstance.post(`/friends/send/${userId}`);
       set((state) => ({
-        sentRequest: [...state.sentRequests, { _id: userId }],
+        sentRequests: [
+          ...state.sentRequests,
+          { _id: response.data.requestId, receiver: { _id: userId } },
+        ],
       }));
-
       toast.success("Friend request sent");
     } catch (error) {
       toast.error(formatError(error), { duration: 5000 });
@@ -160,7 +161,9 @@ export const useFriendsStore = create((set) => ({
     try {
       await axiosInstance.delete(`/friends/cancel/${requestId}`);
       set((state) => ({
-        requests: state.requests.filter((request) => request._id !== requestId),
+        sentRequests: state.sentRequests.filter(
+          (request) => request._id !== requestId
+        ),
       }));
       toast.success("Friend request canceled");
     } catch (error) {

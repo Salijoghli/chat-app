@@ -13,11 +13,13 @@ const Friends = () => {
   const requests = useFriendsStore((state) => state.requests);
   const getUsers = useFriendsStore((state) => state.getUsers);
   const users = useFriendsStore((state) => state.users);
+  const getSentRequests = useFriendsStore((state) => state.getSentRequests);
 
   useEffect(() => {
     getRequests();
     getUsers();
-  }, [getRequests, getUsers]);
+    getSentRequests();
+  }, [getRequests, getUsers, getSentRequests]);
 
   return (
     <div className="h-screen bg-base-200">
