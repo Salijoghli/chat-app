@@ -2,20 +2,30 @@ import { useState } from "react";
 import { useChatStore } from "../store/useChatStore";
 import { useAuthStore } from "../store/useAuthStore";
 import { useFriendsStore } from "../store/useFriendsStore";
+import { useLayoutStore } from "../store/useLayoutStore";
+import classNames from "classnames";
 
 export const Sidebar = () => {
   const selectedUser = useChatStore((state) => state.selectedUser);
   const setSelectedUser = useChatStore((state) => state.setSelectedUser);
   const onlineUsers = useFriendsStore((state) => state.onlineUsers);
   const authUser = useAuthStore((state) => state.authUser);
+  const isChatInfoOpen = useLayoutStore((state) => state.isChatInfoOpen);
   const [showOnlineOnly, setShowOnlineOnly] = useState(false);
 
   const filteredUsers = showOnlineOnly
     ? authUser.friends.filter((user) => onlineUsers.includes(user._id))
     : authUser.friends;
 
+  const sidebarClasses = classNames(
+    "h-full w-30 lg:w-72 bg-base-200 flex flex-col transition-all duration-200 rounded-lg",
+    {
+      "hidden lg:flex": isChatInfoOpen || selectedUser,
+    }
+  );
+
   return (
-    <aside className="h-full w-30 lg:w-72 bg-base-200 flex flex-col transition-all duration-200 rounded-lg ">
+    <aside className={sidebarClasses}>
       <div className="border-b border-base-300 w-full p-5">
         <div className="flex items-center gap-2">
           <p className="text-2xl font-bold">Chats</p>

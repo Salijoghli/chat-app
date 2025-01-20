@@ -11,7 +11,7 @@ const Home = () => {
 
   return (
     <div className="h-screen">
-      <div className="flex items-center justify-center pt-20 px-10">
+      <div className="flex items-center justify-center pt-20 px-5">
         <div className="w-full max-w-8xl h-[calc(100vh-8rem)]">
           <div className="flex h-full rounded-lg overflow-hidden gap-4">
             <Sidebar />
