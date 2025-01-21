@@ -1,11 +1,8 @@
-import expressAsyncHandler from "express-async-handler";
 import { validateSendMessage } from "../../shared/messageValidation.js";
+import expressAsyncHandler from "express-async-handler";
 import Conversation from "../models/conversation.model.js";
 import Message from "../models/message.model.js";
 import handleError from "../utils/handleError.js";
-import mongoose from "mongoose";
-
-const isValidId = (id) => mongoose.Types.ObjectId.isValid(id);
 
 export const sendMessage = expressAsyncHandler(async (req, res) => {
   const { message } = req.body;
@@ -48,8 +45,6 @@ export const sendMessage = expressAsyncHandler(async (req, res) => {
 export const getMessages = expressAsyncHandler(async (req, res) => {
   const { id: receiverId } = req.params;
 
-  if (!isValidId(receiverId)) handleError(res, 400, "Invalid receiver ID.");
-
   const senderId = req.user._id;
 
   const conversation = await Conversation.findOne({
@@ -60,3 +55,9 @@ export const getMessages = expressAsyncHandler(async (req, res) => {
 
   res.status(200).json(conversation.messages);
 });
+
+export const editMessage = expressAsyncHandler(async (req, res) => {});
+
+export const deleteMessage = expressAsyncHandler(async (req, res) => {});
+
+export const replyToMessage = expressAsyncHandler(async (req, res) => {});

@@ -7,18 +7,45 @@ const messageSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    receiverId: {
+    conversationId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Conversation",
       required: true,
     },
-    message: {
+    content: {
       type: String,
-      required: true,
+      required: function () {
+        return this.messageType === "text";
+      },
+    },
+    messageType: {
+      type: String,
+      enum: ["text", "image", "file", "audio"],
+      default: "text",
+    },
+    media: {
+      url: { type: String }, // Media file URL
+      publicId: { type: String }, // Cloud storage public ID
+      fileType: { type: String }, // MIME type (e.g., image/png)
+      fileName: { type: String }, // Original file name
+      fileSize: { type: Number }, // File size in bytes
+    },
+    isPinned: {
+      type: Boolean,
+      default: false,
+    },
+    isEdited: {
+      type: Boolean,
+      default: false,
     },
   },
   { timestamps: true }
 );
+
+// Indexes for efficient querying
+messageSchema.index({ conversationId: 1, createdAt: 1 }); // For pagination
+messageSchema.index({ conversationId: 1, isPinned: 1 }); // For fetching pinned messages
+messageSchema.index({ senderId: 1 }); // For sender-specific queries
 
 const Message = mongoose.model("Message", messageSchema);
 export default Message;
