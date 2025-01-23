@@ -92,7 +92,7 @@ export const createConversation = expressAsyncHandler(async (req, res) => {
     // Get the avatar of the other user
     const otherUser = validParticipants[0];
     const user = await User.findById(otherUser.userId);
-    avatar = user.avatar;
+    avatar = user.profilePicture;
   }
 
   // Create the conversation

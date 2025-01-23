@@ -21,7 +21,7 @@ const router = express.Router();
 router.use(protect);
 
 // GET routes
-router.get("/", getConversations);
+router.get("/", protect, getConversations);
 
 // POST routes
 router.post("/", createConversation);
