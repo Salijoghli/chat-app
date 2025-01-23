@@ -1,53 +1,73 @@
 import mongoose from "mongoose";
 
-const messageSchema = new mongoose.Schema(
+const conversationSchema = new mongoose.Schema(
   {
-    senderId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
-    conversationId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Conversation",
-      required: true,
-    },
-    content: {
+    type: {
       type: String,
-      required: function () {
-        return this.messageType === "text";
+      enum: ["direct", "group"], // 'direct' for one-on-one, 'group' for group chats
+      required: true,
+    },
+    participants: [
+      {
+        userId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+          required: true,
+        },
+        role: {
+          type: String,
+          enum: ["member", "admin"], // Role of the user in the conversation
+          default: "member",
+        },
+        joinedAt: {
+          type: Date,
+          default: Date.now,
+        },
+        _id: false, // Don't create separate _id for each participant
+      },
+    ],
+    name: {
+      type: String,
+      trim: true,
+      default: function () {
+        return this.type === "group" ? "Unnamed Group" : undefined;
       },
     },
-    messageType: {
-      type: String,
-      enum: ["text", "image", "file", "audio"],
-      default: "text",
+    avatar: {
+      type: String, // URL for the group avatar
     },
-    media: {
-      url: { type: String }, // Media file URL
-      publicId: { type: String }, // Cloud storage public ID
-      fileType: { type: String }, // MIME type (e.g., image/png)
-      fileName: { type: String }, // Original file name
-      fileSize: { type: Number }, // File size in bytes
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: function () {
+        return this.type === "group";
+      },
     },
-    isPinned: {
+    pinnedMessages: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Message",
+      },
+    ],
+    lastMessage: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Message",
+      default: null,
+    },
+    isArchived: {
       type: Boolean,
       default: false,
     },
-    isEdited: {
-      type: Boolean,
-      default: false,
-    },
-    readBy: [
+    mutedBy: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
       },
     ],
-    reactions: [
+    removedBy: [
       {
-        userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-        reaction: { type: String }, // Emoji or reaction text
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
       },
     ],
   },
@@ -55,9 +75,8 @@ const messageSchema = new mongoose.Schema(
 );
 
 // Indexes for efficient querying
-messageSchema.index({ conversationId: 1, createdAt: 1 }); // For pagination
-messageSchema.index({ conversationId: 1, isPinned: 1 }); // For fetching pinned messages
-messageSchema.index({ senderId: 1 }); // For sender-specific queries
+conversationSchema.index({ type: 1, "participants.userId": 1 }); // Query by type and participants
+conversationSchema.index({ "lastMessage.sentAt": -1 }); // For sorting by recent activity
 
-const Message = mongoose.model("Message", messageSchema);
-export default Message;
+const Conversation = mongoose.model("Conversation", conversationSchema);
+export default Conversation;

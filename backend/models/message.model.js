@@ -12,23 +12,22 @@ const messageSchema = new mongoose.Schema(
       ref: "Conversation",
       required: true,
     },
+    messageType: {
+      type: String,
+      enum: ["text", "image", "file", "audio", "video"],
+      default: "text",
+    },
     content: {
       type: String,
       required: function () {
         return this.messageType === "text";
       },
     },
-    messageType: {
-      type: String,
-      enum: ["text", "image", "file", "audio"],
-      default: "text",
-    },
     media: {
-      url: { type: String }, // Media file URL
-      publicId: { type: String }, // Cloud storage public ID
-      fileType: { type: String }, // MIME type (e.g., image/png)
-      fileName: { type: String }, // Original file name
-      fileSize: { type: Number }, // File size in bytes
+      url: String,
+      fileType: String,
+      fileName: String,
+      fileSize: Number,
     },
     isPinned: {
       type: Boolean,
@@ -38,6 +37,11 @@ const messageSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    replyTo: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Message",
+      default: null,
+    },
   },
   { timestamps: true }
 );
@@ -46,6 +50,7 @@ const messageSchema = new mongoose.Schema(
 messageSchema.index({ conversationId: 1, createdAt: 1 }); // For pagination
 messageSchema.index({ conversationId: 1, isPinned: 1 }); // For fetching pinned messages
 messageSchema.index({ senderId: 1 }); // For sender-specific queries
+messageSchema.index({ replyTo: 1 }); // For fetching replies
 
 const Message = mongoose.model("Message", messageSchema);
 export default Message;

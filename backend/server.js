@@ -4,6 +4,7 @@ import authRoutes from "./routes/auth.route.js";
 import messageRoutes from "./routes/message.route.js";
 import usersRoutes from "./routes/users.route.js";
 import friendsRoutes from "./routes/friends.route.js";
+import conversationRoutes from "./routes/conversations.route.js";
 import errorMiddleware from "./middleware/error.middleware.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
@@ -38,6 +39,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/users", usersRoutes);
 app.use("/api/friends", friendsRoutes);
+app.use("/api/conversations", conversationRoutes);
 
 //error handling middleware
 app.use(errorMiddleware);
