@@ -38,4 +38,21 @@ export const useChatStore = create((set, get) => ({
       set({ loading: false });
     }
   },
+  createConversation: async (details) => {
+    set({ loading: true });
+    try {
+      const res = await axiosInstance.post("/conversations", details);
+      if (res.data.existingConversation) {
+        set({ selectedConversation: res.data.existingConversation });
+        toast.success("Already in conversation with this user");
+      } else {
+        set({ conversations: [...get().conversations, res.data.conversation] });
+        set({ selectedConversation: res.data.conversation });
+      }
+    } catch (error) {
+      toast.error(formatError(error), { duration: 5000 });
+    } finally {
+      set({ loading: false });
+    }
+  },
 }));
