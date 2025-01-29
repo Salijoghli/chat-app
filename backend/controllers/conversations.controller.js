@@ -21,7 +21,7 @@ export const getConversations = expressAsyncHandler(async (req, res) => {
       path: "lastMessage",
     })
     .select(
-      "-pinnedMessages -mutedBy -isArchived -createdBy -removedBy -updatedAt -__v -participants"
+      "-pinnedMessages -mutedBy -isArchived -createdBy -removedBy -updatedAt -__v"
     )
     .sort("-updatedAt");
   res.status(200).json({
@@ -30,6 +30,7 @@ export const getConversations = expressAsyncHandler(async (req, res) => {
     conversations,
   });
 });
+
 export const createConversation = expressAsyncHandler(async (req, res) => {
   const userId = req.user._id;
 
@@ -68,6 +69,7 @@ export const createConversation = expressAsyncHandler(async (req, res) => {
   const isGroup = type === "group";
 
   let avatar = "";
+  let username = "";
 
   // If direct conversation, check if the conversation already exists
   if (!isGroup) {
@@ -93,13 +95,14 @@ export const createConversation = expressAsyncHandler(async (req, res) => {
     const otherUser = validParticipants[0];
     const user = await User.findById(otherUser.userId);
     avatar = user.profilePicture;
+    username = user.username;
   }
 
   // Create the conversation
   const conversation = new Conversation({
     type,
     participants: [...validParticipants, { userId, role: "admin" }],
-    name: isGroup ? name : undefined,
+    name: isGroup ? name : username,
     createdBy: isGroup ? userId : undefined,
     avatar,
   });

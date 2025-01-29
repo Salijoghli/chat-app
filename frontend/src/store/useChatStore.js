@@ -5,11 +5,15 @@ import { formatError } from "../utils/formatError.js";
 import toast from "react-hot-toast";
 
 export const useChatStore = create((set, get) => ({
-  selectedUser: null,
+  selectedConversation: null,
+  selectedUser: null, // Selected user in the chat
+  conversations: [],
   messages: [],
   loading: false,
   error: false,
   setSelectedUser: (user) => set({ selectedUser: user }),
+  setSelectedConversation: (conversation) =>
+    set({ selectedConversation: conversation }),
   getMessages: async () => {
     set({ loading: true });
     try {
@@ -17,6 +21,17 @@ export const useChatStore = create((set, get) => ({
         `/messages/${get().selectedUser._id}`
       );
       set({ messages: res.data.messages });
+    } catch (error) {
+      toast.error(formatError(error), { duration: 5000 });
+    } finally {
+      set({ loading: false });
+    }
+  },
+  getConversations: async () => {
+    set({ loading: true });
+    try {
+      const res = await axiosInstance.get("/conversations");
+      set({ conversations: res.data.conversations });
     } catch (error) {
       toast.error(formatError(error), { duration: 5000 });
     } finally {

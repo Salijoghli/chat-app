@@ -7,15 +7,17 @@ import { MessagesSkeleton } from "./MessagesSkeleton";
 import classNames from "classnames";
 
 export const ChatContainer = () => {
-  const selectedUser = useChatStore((state) => state.selectedUser);
-  const messages = useChatStore((state) => state.messages);
+  // const messages = useChatStore((state) => state.messages);
   const loading = useChatStore((state) => state.loading);
-  const getMessages = useChatStore((state) => state.getMessages);
+  // const getMessages = useChatStore((state) => state.getMessages);
   const isChatInfoOpen = useLayoutStore((state) => state.isChatInfoOpen);
+  // const selectedConversation = useChatStore(
+  //   (state) => state.selectedConversation
+  // );
 
-  useEffect(() => {
-    getMessages();
-  }, [getMessages]);
+  // useEffect(() => {
+  //   getMessages();
+  // }, [getMessages]);
 
   const containerClasses = classNames(
     "flex-1 sm:flex flex-col overflow-auto bg-base-200 rounded-lg",

@@ -6,7 +6,9 @@ import { NoChat } from "../components/NoChat";
 import { ChatInfo } from "../components/ChatInfo";
 
 const Home = () => {
-  const selectedUser = useChatStore((state) => state.selectedUser);
+  const selectedConversation = useChatStore(
+    (state) => state.selectedConversation
+  );
   const isChatInfoOpen = useLayoutStore((state) => state.isChatInfoOpen);
 
   return (
@@ -15,7 +17,7 @@ const Home = () => {
         <div className="w-full max-w-8xl h-[calc(100vh-8rem)]">
           <div className="flex h-full rounded-lg overflow-hidden gap-4">
             <Sidebar />
-            {selectedUser ? <ChatContainer /> : <NoChat />}
+            {selectedConversation ? <ChatContainer /> : <NoChat />}
 
             {/* Chat Info */}
             {isChatInfoOpen && <ChatInfo />}

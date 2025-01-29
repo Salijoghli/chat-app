@@ -8,7 +8,7 @@ export const addReaction = expressAsyncHandler(async (req, res) => {
   const { reaction } = req.body;
 
   const { error } = validateReaction({ reaction });
-  if (error) return handleError(400, error.details[0].message, res);
+  if (error) handleError(400, error.details[0].message, res);
 
   const newReaction = new Reaction({
     reaction,

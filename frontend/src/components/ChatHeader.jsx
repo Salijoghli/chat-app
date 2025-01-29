@@ -5,11 +5,19 @@ import { useLayoutStore } from "../store/useLayoutStore";
 import classNames from "classnames";
 
 export const ChatHeader = () => {
-  const selectedUser = useChatStore((state) => state.selectedUser);
-  const setSelectedUser = useChatStore((state) => state.setSelectedUser);
+  const selectedConversation = useChatStore(
+    (state) => state.selectedConversation
+  );
+  const setSelectedConversation = useChatStore(
+    (state) => state.setSelectedConversation
+  );
   const onlineUsers = useFriendsStore((state) => state.onlineUsers);
   const toggleChatInfo = useLayoutStore((state) => state.toggleChatInfo);
   const isChatInfoOpen = useLayoutStore((state) => state.isChatInfoOpen);
+  const isGroup = selectedConversation.type === "group";
+  const selectedUser = !isGroup && selectedConversation?.participants[0];
+
+  const { avatar, name } = selectedConversation;
 
   const btnClasses = classNames("btn btn-circle", {
     "bg-indigo-800": isChatInfoOpen,
@@ -21,26 +29,23 @@ export const ChatHeader = () => {
         <div className="flex items-center gap-3 px-3">
           <button
             className="btn btn-circle block lg:hidden"
-            onClick={() => setSelectedUser(null)}
+            onClick={() => setSelectedConversation(null)}
           >
             <MoveLeft />
           </button>
           <button className="btn flex items-center gap-3">
             {/* Avatar */}
             <div className="avatar">
-              <div className="size-10 rounded-full relative">
-                <img
-                  src={selectedUser.profilePicture}
-                  alt={selectedUser.username}
-                />
+              <div className="size-10 rounded-full relative ">
+                <img src={avatar || "/avatar.png"} alt={name} />
               </div>
             </div>
 
             {/* User info */}
             <div>
-              <h3 className="font-medium">{selectedUser.username}</h3>
+              <h3 className="font-medium">{name}</h3>
               <p className="text-sm text-base-content/70">
-                {onlineUsers.includes(selectedUser._id) ? "Online" : "Offline"}
+                {onlineUsers.includes(selectedUser._id) ? "Active Now" : ""}
               </p>
             </div>
           </button>
