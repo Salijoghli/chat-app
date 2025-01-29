@@ -16,6 +16,7 @@ export const getConversations = expressAsyncHandler(async (req, res) => {
       },
     },
     isArchived: { $ne: true }, // Exclude archived conversations
+    removedBy: { $ne: user._id }, // Exclude conversations that the user has removed
   })
     .populate({
       path: "lastMessage",
@@ -76,11 +77,10 @@ export const createConversation = expressAsyncHandler(async (req, res) => {
     const existingConversation = await Conversation.findOne({
       type: "direct",
       participants: {
-        $elemMatch: {
-          userId: {
-            $in: [userId, ...validParticipants.map((p) => p.userId)],
-          },
-        },
+        $all: [
+          { $elemMatch: { userId: userId } },
+          { $elemMatch: { userId: validParticipants[0].userId } },
+        ],
       },
     });
 
@@ -132,7 +132,35 @@ export const addParticipantToGroup = expressAsyncHandler(
 export const removeParticipantFromGroup = expressAsyncHandler(
   async (req, res) => {}
 );
-export const deleteConversation = expressAsyncHandler(async (req, res) => {});
+export const deleteConversation = expressAsyncHandler(async (req, res) => {
+  const { conversationId } = req.params;
+  const userId = req.user._id;
+
+  if (!isValidId(conversationId))
+    handleError(res, 400, "Invalid conversation id.");
+
+  const conversation = await Conversation.findById(conversationId);
+  if (!conversation) handleError(res, 404, "Conversation not found.");
+
+  // Check if user is a participant in the conversation
+  const isParticipant = conversation.participants.some((p) =>
+    p.userId.equals(userId)
+  );
+  if (!isParticipant)
+    handleError(res, 403, "You are not a participant in this conversation.");
+
+  // Add user to removedBy array to hide conversation from their view
+  if (!conversation.removedBy.includes(userId)) {
+    conversation.removedBy.push(userId);
+  }
+
+  await conversation.save();
+
+  res.status(200).json({
+    message: "Conversation deleted successfully.",
+    success: true,
+  });
+});
 
 export const muteConversation = expressAsyncHandler(async (req, res) => {});
 export const unmuteConversation = expressAsyncHandler(async (req, res) => {});

@@ -54,10 +54,12 @@ const conversationSchema = new mongoose.Schema(
       ref: "Message",
       default: null,
     },
-    isArchived: {
-      type: Boolean,
-      default: false,
-    },
+    archivedBy: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
     mutedBy: [
       {
         type: mongoose.Schema.Types.ObjectId,

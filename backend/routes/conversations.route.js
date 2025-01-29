@@ -37,7 +37,6 @@ router.patch("/:conversationId/unarchive", unarchiveConversation);
 
 // DELETE routes
 router.delete("/:conversationId", deleteConversation);
-
 router.delete(
   "/:conversationId/participants/:userId",
   removeParticipantFromGroup
