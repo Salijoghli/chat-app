@@ -79,7 +79,10 @@ export const login = expressAsyncHandler(async (req, res) => {
     handleError(res, 400, errors);
   }
 
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email }).populate(
+    "friends",
+    "username profilePicture"
+  );
 
   if (!user || !(await bcrypt.compare(password, user.password)))
     handleError(res, 400, "Invalid credentials");
