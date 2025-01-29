@@ -97,24 +97,20 @@ export const CreateConversationModal = ({ modalRef }) => {
         />
 
         <div className="flex flex-col gap-2 mt-4 max-h-48 overflow-y-auto overflow-x-hidden">
-          {filteredFriends
-            .filter(
-              (friend) => !selectedUsers.some((u) => u._id === friend._id)
-            )
-            .map((friend) => (
-              <button
-                className="btn btn-ghost justify-start"
-                key={friend._id}
-                onClick={() => handleUserSelect(friend)}
-              >
-                <img
-                  className="w-8 h-8 rounded-full mr-2"
-                  src={friend.profilePicture}
-                  alt={friend.username}
-                />
-                <span className="text-sm">{friend.username}</span>
-              </button>
-            ))}
+          {filteredFriends.map((friend) => (
+            <button
+              className="btn btn-ghost justify-start"
+              key={friend._id}
+              onClick={() => handleUserSelect(friend)}
+            >
+              <img
+                className="w-8 h-8 rounded-full mr-2"
+                src={friend.profilePicture}
+                alt={friend.username}
+              />
+              <span className="text-sm">{friend.username}</span>
+            </button>
+          ))}
         </div>
 
         <div className="modal-action mt-0">

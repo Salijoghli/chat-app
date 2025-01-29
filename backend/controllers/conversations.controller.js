@@ -15,15 +15,13 @@ export const getConversations = expressAsyncHandler(async (req, res) => {
         userId: user._id,
       },
     },
-    isArchived: { $ne: true }, // Exclude archived conversations
-    removedBy: { $ne: user._id }, // Exclude conversations that the user has removed
+    archivedBy: { $nin: [user._id] }, // Exclude conversations archived by user
+    removedBy: { $nin: [user._id] }, // Exclude conversations removed by user
   })
     .populate({
       path: "lastMessage",
     })
-    .select(
-      "-pinnedMessages -mutedBy -isArchived -createdBy -removedBy -updatedAt -__v"
-    )
+    .select("-pinnedMessages -archivedBy -createdBy -removedBy -updatedAt -__v")
     .sort("-updatedAt");
   res.status(200).json({
     success: true,

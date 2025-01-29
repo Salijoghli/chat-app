@@ -1,5 +1,17 @@
 import { useChatStore } from "../store/useChatStore";
+import { useAuthStore } from "../store/useAuthStore";
+import {
+  Ellipsis,
+  Trash,
+  Archive,
+  Bell,
+  BellOff,
+  User,
+  MessageCircleX,
+} from "lucide-react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import classNames from "classnames";
+
 export const Conversation = ({ conversation }) => {
   const setSelectedConversation = useChatStore(
     (state) => state.setSelectedConversation
@@ -14,6 +26,89 @@ export const Conversation = ({ conversation }) => {
     setSelectedUser(conversation.participants[0]);
   };
   const { avatar, lastMessage, name } = conversation;
+
+  const [visibleActions, setVisibleActions] = useState({
+    mute: true,
+    archive: true,
+  });
+
+  const dropdownRef = useRef(null);
+  const [dropdownPosition, setDropdownPosition] = useState("");
+
+  const authUser = useAuthStore((state) => state.authUser);
+
+  const isMuted = conversation.mutedBy.includes(authUser._id);
+  const isGroup = conversation.type === "group";
+
+  const actions = useMemo(
+    () => [
+      {
+        key: "mute",
+        label: "Mute Notifications",
+        icon: BellOff,
+        toggleKey: "unmute",
+        visible: !isMuted,
+      },
+      {
+        key: "unmute",
+        label: "Unmute Notifications",
+        icon: Bell,
+        toggleKey: "mute",
+        visible: isMuted,
+      },
+      { key: "delete", label: "Delete Chat", icon: Trash, visible: true },
+      {
+        key: "archive",
+        label: "Archive Chat",
+        icon: Archive,
+        toggleKey: "unarchive",
+        visible: true,
+      },
+      { key: "profile", label: "View Profile", icon: User, visible: !isGroup },
+      {
+        key: "leave",
+        label: "Leave Chat",
+        icon: MessageCircleX,
+        visible: isGroup,
+      },
+    ],
+    [isGroup, isMuted]
+  );
+
+  // This is to make the dropdown position relative to the conversation
+  useEffect(() => {
+    function updateDropdownPosition() {
+      if (dropdownRef.current) {
+        const rect = dropdownRef.current.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const spaceAbove = rect.top;
+
+        if (spaceBelow >= rect.height && spaceBelow > spaceAbove) {
+          setDropdownPosition("");
+        } else if (spaceAbove >= rect.height) {
+          setDropdownPosition("dropdown-top");
+        } else {
+          setDropdownPosition("");
+        }
+      }
+    }
+
+    window.addEventListener("resize", updateDropdownPosition);
+    updateDropdownPosition(); // Run once when the component mounts
+
+    return () => window.removeEventListener("resize", updateDropdownPosition);
+  }, []);
+
+  const handleActionClick = (key, toggleKey) => {
+    if (toggleKey) {
+      setVisibleActions((prev) => ({
+        ...prev,
+        [key]: false,
+        [toggleKey]: true, // Show the toggled action
+      }));
+    }
+  };
+
   return (
     <button
       onClick={handleClick}
@@ -36,12 +131,39 @@ export const Conversation = ({ conversation }) => {
           }}
         />
       </div>
-
       <div className="text-left flex-1 min-w-0">
         <div className="font-medium truncate max-w-full">{name}</div>
         <div className="text-sm text-zinc-400 truncate max-w-full">
-          {lastMessage?.content || "No messages"}
+          {lastMessage?.content}
         </div>
+      </div>
+      <div
+        ref={dropdownRef}
+        className={`dropdown dropdown-end ${dropdownPosition}`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div tabIndex={0} role="button" className="btn">
+          <Ellipsis />
+        </div>
+        <ul
+          tabIndex={0}
+          className="dropdown-content menu shadow-inner ring-1 ring-gray-200 bg-base-200 rounded-box z-[1] w-80"
+        >
+          {actions.map((action) => {
+            if (!action.visible) return null;
+
+            return (
+              <div
+                key={action.key}
+                className="btn btn-block justify-start"
+                onClick={() => handleActionClick(action.key, action.toggleKey)}
+              >
+                <action.icon className="size-5" />
+                {action.label}
+              </div>
+            );
+          })}
+        </ul>
       </div>
     </button>
   );

@@ -64,7 +64,7 @@ export const Sidebar = () => {
         </div>
       </div>
 
-      <div className="overflow-y-auto overflow-x-hidden w-full py-3">
+      <div className="flex flex-col gap-2 overflow-y-auto h-screen">
         {filteredConversations.map((conversation) => (
           <Conversation key={conversation._id} conversation={conversation} />
         ))}

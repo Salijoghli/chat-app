@@ -55,4 +55,18 @@ export const useChatStore = create((set, get) => ({
       set({ loading: false });
     }
   },
+  deleteConversation: async (conversationId) => {
+    set({ loading: true });
+    try {
+      const res = await axiosInstance.delete(
+        `/conversations/${conversationId}`
+      );
+      toast.success(res.data.message);
+      get().getConversations();
+    } catch (error) {
+      toast.error(formatError(error), { duration: 5000 });
+    } finally {
+      set({ loading: false });
+    }
+  },
 }));
