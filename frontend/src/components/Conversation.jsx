@@ -27,10 +27,7 @@ export const Conversation = ({ conversation }) => {
   };
   const { avatar, lastMessage, name } = conversation;
 
-  const [visibleActions, setVisibleActions] = useState({
-    mute: true,
-    archive: true,
-  });
+  const deleteConversation = useChatStore((state) => state.deleteConversation);
 
   const dropdownRef = useRef(null);
   const [dropdownPosition, setDropdownPosition] = useState("");
@@ -46,33 +43,47 @@ export const Conversation = ({ conversation }) => {
         key: "mute",
         label: "Mute Notifications",
         icon: BellOff,
-        toggleKey: "unmute",
         visible: !isMuted,
+        action: () => {},
       },
+
       {
         key: "unmute",
         label: "Unmute Notifications",
         icon: Bell,
-        toggleKey: "mute",
         visible: isMuted,
+        action: () => {},
       },
-      { key: "delete", label: "Delete Chat", icon: Trash, visible: true },
+      {
+        key: "delete",
+        label: "Delete Chat",
+        icon: Trash,
+        visible: true,
+        action: () => deleteConversation(conversation._id),
+      },
       {
         key: "archive",
         label: "Archive Chat",
         icon: Archive,
-        toggleKey: "unarchive",
         visible: true,
+        action: () => {},
       },
-      { key: "profile", label: "View Profile", icon: User, visible: !isGroup },
+      {
+        key: "profile",
+        label: "View Profile",
+        icon: User,
+        visible: !isGroup,
+        action: () => {},
+      },
       {
         key: "leave",
         label: "Leave Chat",
         icon: MessageCircleX,
         visible: isGroup,
+        action: () => {},
       },
     ],
-    [isGroup, isMuted]
+    [isGroup, isMuted, conversation._id, deleteConversation]
   );
 
   // This is to make the dropdown position relative to the conversation
@@ -98,16 +109,6 @@ export const Conversation = ({ conversation }) => {
 
     return () => window.removeEventListener("resize", updateDropdownPosition);
   }, []);
-
-  const handleActionClick = (key, toggleKey) => {
-    if (toggleKey) {
-      setVisibleActions((prev) => ({
-        ...prev,
-        [key]: false,
-        [toggleKey]: true, // Show the toggled action
-      }));
-    }
-  };
 
   return (
     <button
@@ -156,7 +157,7 @@ export const Conversation = ({ conversation }) => {
               <div
                 key={action.key}
                 className="btn btn-block justify-start"
-                onClick={() => handleActionClick(action.key, action.toggleKey)}
+                onClick={() => action.action()}
               >
                 <action.icon className="size-5" />
                 {action.label}

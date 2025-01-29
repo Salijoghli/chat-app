@@ -62,7 +62,16 @@ export const useChatStore = create((set, get) => ({
         `/conversations/${conversationId}`
       );
       toast.success(res.data.message);
-      get().getConversations();
+
+      if (get().selectedConversation._id === conversationId) {
+        set({ selectedConversation: null });
+      }
+
+      set({
+        conversations: get().conversations.filter(
+          (conversation) => conversation._id !== conversationId
+        ),
+      });
     } catch (error) {
       toast.error(formatError(error), { duration: 5000 });
     } finally {
