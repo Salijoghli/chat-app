@@ -3,7 +3,6 @@ import { useAuthStore } from "../store/useAuthStore";
 import {
   Ellipsis,
   Trash,
-  Archive,
   Bell,
   BellOff,
   User,
@@ -28,6 +27,7 @@ export const Conversation = ({ conversation }) => {
   const { avatar, lastMessage, name } = conversation;
 
   const deleteConversation = useChatStore((state) => state.deleteConversation);
+  const leaveGroup = useChatStore((state) => state.leaveGroup);
 
   const dropdownRef = useRef(null);
   const [dropdownPosition, setDropdownPosition] = useState("");
@@ -56,17 +56,10 @@ export const Conversation = ({ conversation }) => {
       },
       {
         key: "delete",
-        label: "Delete Chat",
+        label: "Hide Chat",
         icon: Trash,
         visible: true,
         action: () => deleteConversation(conversation._id),
-      },
-      {
-        key: "archive",
-        label: "Archive Chat",
-        icon: Archive,
-        visible: true,
-        action: () => {},
       },
       {
         key: "profile",
@@ -77,14 +70,16 @@ export const Conversation = ({ conversation }) => {
       },
       {
         key: "leave",
-        label: "Leave Chat",
+        label: "Leave Group",
         icon: MessageCircleX,
         visible: isGroup,
-        action: () => {},
+        action: () => leaveGroup(conversation._id),
       },
     ],
-    [isGroup, isMuted, conversation._id, deleteConversation]
+    [isGroup, isMuted, conversation._id, leaveGroup, deleteConversation]
   );
+
+  const conversations = useChatStore((state) => state.conversations);
 
   // This is to make the dropdown position relative to the conversation
   useEffect(() => {
@@ -108,7 +103,7 @@ export const Conversation = ({ conversation }) => {
     updateDropdownPosition(); // Run once when the component mounts
 
     return () => window.removeEventListener("resize", updateDropdownPosition);
-  }, []);
+  }, [conversations]);
 
   return (
     <button

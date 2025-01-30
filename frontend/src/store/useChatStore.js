@@ -42,13 +42,13 @@ export const useChatStore = create((set, get) => ({
     set({ loading: true });
     try {
       const res = await axiosInstance.post("/conversations", details);
-      if (res.data.existingConversation) {
-        set({ selectedConversation: res.data.existingConversation });
-        toast.success("Already in conversation with this user");
-      } else {
-        set({ conversations: [...get().conversations, res.data.conversation] });
-        set({ selectedConversation: res.data.conversation });
+      const conversation = res.data.conversation;
+      const myConversations = get().conversations;
+      if (!myConversations.some((c) => c._id === conversation._id)) {
+        set({ conversations: [...myConversations, conversation] });
       }
+      set({ selectedConversation: conversation });
+      toast.success(res.data.message);
     } catch (error) {
       toast.error(formatError(error), { duration: 5000 });
     } finally {
@@ -61,17 +61,35 @@ export const useChatStore = create((set, get) => ({
       const res = await axiosInstance.delete(
         `/conversations/${conversationId}`
       );
-      toast.success(res.data.message);
-
-      if (get().selectedConversation._id === conversationId) {
-        set({ selectedConversation: null });
-      }
-
       set({
         conversations: get().conversations.filter(
           (conversation) => conversation._id !== conversationId
         ),
       });
+
+      if (get().selectedConversation?._id === conversationId) {
+        set({ selectedConversation: null });
+      }
+
+      toast.success(res.data.message);
+    } catch (error) {
+      toast.error(formatError(error), { duration: 5000 });
+    } finally {
+      set({ loading: false });
+    }
+  },
+  leaveGroup: async (conversationId) => {
+    set({ loading: true });
+    try {
+      const res = await axiosInstance.delete(
+        `/conversations/${conversationId}/leave`
+      );
+      set({
+        conversations: get().conversations.filter(
+          (conversation) => conversation._id !== conversationId
+        ),
+      });
+      toast.success(res.data.message);
     } catch (error) {
       toast.error(formatError(error), { duration: 5000 });
     } finally {

@@ -12,8 +12,6 @@ import {
   leaveGroup,
   muteConversation,
   unmuteConversation,
-  archiveConversation,
-  unarchiveConversation,
 } from "../controllers/conversations.controller.js";
 
 const router = express.Router();
@@ -32,8 +30,6 @@ router.post("/:conversationId/admins", addAdminToGroup);
 router.patch("/:conversationId", updateConversation); // Update conversation details (name, avatar, etc.)
 router.patch("/:conversationId/mute", muteConversation);
 router.patch("/:conversationId/unmute", unmuteConversation);
-router.patch("/:conversationId/archive", archiveConversation);
-router.patch("/:conversationId/unarchive", unarchiveConversation);
 
 // DELETE routes
 router.delete("/:conversationId", deleteConversation);

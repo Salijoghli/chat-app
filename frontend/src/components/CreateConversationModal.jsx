@@ -45,15 +45,13 @@ export const CreateConversationModal = ({ modalRef }) => {
       acc.push({ userId: id });
       return acc;
     }, []);
-    const isGroup = selectedUsers.length > 1;
-    const type = !isGroup ? "direct" : "group";
-    const name = !isGroup
-      ? selectedUsers[0].username
-      : selectedUsers.map((user) => user.username).join(", ");
+    const name =
+      selectedUsers.length > 1
+        ? selectedUsers.map((user) => user.username).join(", ")
+        : selectedUsers[0].username;
 
     const conversation = {
       participants,
-      type,
       name,
     };
 

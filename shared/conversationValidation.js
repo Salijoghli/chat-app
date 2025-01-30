@@ -3,7 +3,6 @@ import Joi from "joi";
 import { validator } from "./validator.js";
 
 const conversationSchema = Joi.object({
-  type: Joi.string().valid("direct", "group").required(),
   participants: Joi.array()
     .items(
       Joi.object({
@@ -12,13 +11,7 @@ const conversationSchema = Joi.object({
     )
     .min(1)
     .required(),
-  name: Joi.string()
-    .trim()
-    .when("type", {
-      is: Joi.string().valid("group"),
-      then: Joi.string().required(),
-      otherwise: Joi.allow(""),
-    }),
+  name: Joi.string().required(),
 });
 
 export const validateConversation = validator(conversationSchema);

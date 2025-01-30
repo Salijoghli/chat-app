@@ -7,6 +7,8 @@ import User from "../models/user.model.js";
 
 const isValidId = (id) => mongoose.Types.ObjectId.isValid(id);
 
+// get conversations for user
+// not including conversations removed by user
 export const getConversations = expressAsyncHandler(async (req, res) => {
   const user = req.user;
   const conversations = await Conversation.find({
@@ -15,13 +17,12 @@ export const getConversations = expressAsyncHandler(async (req, res) => {
         userId: user._id,
       },
     },
-    archivedBy: { $nin: [user._id] }, // Exclude conversations archived by user
     removedBy: { $nin: [user._id] }, // Exclude conversations removed by user
   })
     .populate({
       path: "lastMessage",
     })
-    .select("-pinnedMessages -archivedBy -createdBy -removedBy -updatedAt -__v")
+    .select("-pinnedMessages -createdBy -removedBy -updatedAt -__v")
     .sort("-updatedAt");
   res.status(200).json({
     success: true,
@@ -40,40 +41,40 @@ export const createConversation = expressAsyncHandler(async (req, res) => {
     handleError(res, 400, errors);
   }
 
-  const { type, participants, name } = req.body;
+  const { participants, name } = req.body;
 
-  if (type === "direct" && participants.length > 1)
-    handleError(res, 400, "Direct conversation can only have 2 participants.");
+  const direct = participants.length === 1;
+
+  const type = direct ? "direct" : "group";
 
   // Convert participant userIds to ObjectId
-  const validParticipants = participants.map((participant) => {
-    if (!isValidId(participant.userId)) {
-      handleError(res, 400, `Invalid userId: ${participant.userId}.`);
-    }
+  const validParticipants = await Promise.all(
+    participants.map(async (participant) => {
+      if (!isValidId(participant.userId)) {
+        handleError(res, 400, `Invalid userId: ${participant.userId}.`);
+      }
 
-    const user = User.findById(participant.userId);
+      const user = await User.findById(participant.userId);
 
-    if (!user)
-      handleError(
-        res,
-        404,
-        `User not found for userId: ${participant.userId}.`
-      );
+      if (!user)
+        handleError(
+          res,
+          404,
+          `User not found for userId: ${participant.userId}.`
+        );
 
-    return {
-      userId: new mongoose.Types.ObjectId(participant.userId),
-    };
-  });
-
-  const isGroup = type === "group";
+      return {
+        userId: new mongoose.Types.ObjectId(participant.userId),
+      };
+    })
+  );
 
   let avatar = "";
-  let username = "";
 
-  // If direct conversation, check if the conversation already exists
-  if (!isGroup) {
-    const existingConversation = await Conversation.findOne({
-      type: "direct",
+  // Check if the conversation already exists
+  if (direct) {
+    const conversation = await Conversation.findOne({
+      type,
       participants: {
         $all: [
           { $elemMatch: { userId: userId } },
@@ -82,54 +83,38 @@ export const createConversation = expressAsyncHandler(async (req, res) => {
       },
     });
 
-    if (existingConversation) {
+    if (conversation) {
+      conversation.removedBy = [];
+      await conversation.save();
       return res.status(200).json({
-        message: "Direct conversation already exists.",
+        message: "Conversation already exists.",
         success: true,
-        existingConversation,
+        conversation,
       });
     }
     // Get the avatar of the other user
     const otherUser = validParticipants[0];
     const user = await User.findById(otherUser.userId);
-    avatar = user.profilePicture;
-    username = user.username;
+    avatar = user?.profilePicture || "";
   }
 
   // Create the conversation
-  const conversation = new Conversation({
+  const conversation = await Conversation.create({
     type,
     participants: [...validParticipants, { userId, role: "admin" }],
-    name: isGroup ? name : username,
-    createdBy: isGroup ? userId : undefined,
+    name,
+    createdBy: userId,
     avatar,
   });
-
-  await conversation.save();
 
   res.status(201).json({
     message: "Conversation created successfully.",
     success: true,
-    conversation: {
-      _id: conversation._id,
-      type: conversation.type,
-      participants: conversation.participants,
-      name: conversation.name,
-      avatar: conversation.avatar,
-      createdBy: conversation.createdBy,
-    },
+    conversation,
   });
 });
 
-export const updateConversation = expressAsyncHandler(async (req, res) => {});
-export const addAdminToGroup = expressAsyncHandler(async (req, res) => {});
-export const removeAdminFromGroup = expressAsyncHandler(async (req, res) => {});
-export const addParticipantToGroup = expressAsyncHandler(
-  async (req, res) => {}
-);
-export const removeParticipantFromGroup = expressAsyncHandler(
-  async (req, res) => {}
-);
+// not actual delete, just hide conversation from user
 export const deleteConversation = expressAsyncHandler(async (req, res) => {
   const { conversationId } = req.params;
   const userId = req.user._id;
@@ -161,10 +146,32 @@ export const deleteConversation = expressAsyncHandler(async (req, res) => {
 });
 
 export const muteConversation = expressAsyncHandler(async (req, res) => {});
+
 export const unmuteConversation = expressAsyncHandler(async (req, res) => {});
-export const archiveConversation = expressAsyncHandler(async (req, res) => {});
-export const unarchiveConversation = expressAsyncHandler(
+
+export const leaveGroup = expressAsyncHandler(async (req, res) => {
+  const { conversationId } = req.params;
+  const userId = req.user._id;
+
+  const conversation = await Conversation.findById(conversationId);
+  if (!conversation) handleError(res, 404, "Conversation not found.");
+
+  conversation.participants.pull(userId);
+
+  await conversation.save();
+
+  res.status(200).json({
+    message: "You have left the group.",
+    success: true,
+  });
+});
+
+export const updateConversation = expressAsyncHandler(async (req, res) => {});
+export const addAdminToGroup = expressAsyncHandler(async (req, res) => {});
+export const removeAdminFromGroup = expressAsyncHandler(async (req, res) => {});
+export const addParticipantToGroup = expressAsyncHandler(
   async (req, res) => {}
 );
-
-export const leaveGroup = expressAsyncHandler(async (req, res) => {});
+export const removeParticipantFromGroup = expressAsyncHandler(
+  async (req, res) => {}
+);
