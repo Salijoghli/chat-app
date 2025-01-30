@@ -145,10 +145,41 @@ export const deleteConversation = expressAsyncHandler(async (req, res) => {
   });
 });
 
-export const muteConversation = expressAsyncHandler(async (req, res) => {});
+// mute conversation
+export const muteConversation = expressAsyncHandler(async (req, res) => {
+  const { conversationId } = req.params;
+  const userId = req.user._id;
 
-export const unmuteConversation = expressAsyncHandler(async (req, res) => {});
+  const conversation = await Conversation.findByIdAndUpdate(conversationId, {
+    $addToSet: { mutedBy: userId },
+    new: true,
+  });
+  if (!conversation) handleError(res, 404, "Conversation not found.");
 
+  res.status(200).json({
+    message: "Conversation muted successfully.",
+    success: true,
+  });
+});
+
+// unmute conversation
+export const unmuteConversation = expressAsyncHandler(async (req, res) => {
+  const { conversationId } = req.params;
+  const userId = req.user._id;
+
+  const conversation = await Conversation.findByIdAndUpdate(conversationId, {
+    $pull: { mutedBy: userId },
+    new: true,
+  });
+  if (!conversation) handleError(res, 404, "Conversation not found.");
+
+  res.status(200).json({
+    message: "Conversation unmuted successfully.",
+    success: true,
+  });
+});
+
+// leave group
 export const leaveGroup = expressAsyncHandler(async (req, res) => {
   const { conversationId } = req.params;
   const userId = req.user._id;

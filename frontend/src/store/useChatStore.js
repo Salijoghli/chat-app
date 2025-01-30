@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { axiosInstance } from "../lib/axios";
 import { formatError } from "../utils/formatError.js";
+import { useAuthStore } from "./useAuthStore.js";
 
 import toast from "react-hot-toast";
 
@@ -45,7 +46,7 @@ export const useChatStore = create((set, get) => ({
       const conversation = res.data.conversation;
       const myConversations = get().conversations;
       if (!myConversations.some((c) => c._id === conversation._id)) {
-        set({ conversations: [...myConversations, conversation] });
+        set({ conversations: [conversation, ...myConversations] });
       }
       set({ selectedConversation: conversation });
       toast.success(res.data.message);
@@ -87,6 +88,57 @@ export const useChatStore = create((set, get) => ({
       set({
         conversations: get().conversations.filter(
           (conversation) => conversation._id !== conversationId
+        ),
+      });
+      toast.success(res.data.message);
+    } catch (error) {
+      toast.error(formatError(error), { duration: 5000 });
+    } finally {
+      set({ loading: false });
+    }
+  },
+  muteConversation: async (conversationId) => {
+    set({ loading: true });
+    try {
+      const res = await axiosInstance.patch(
+        `/conversations/${conversationId}/mute`
+      );
+      set({
+        conversations: get().conversations.map((conversation) =>
+          conversation._id === conversationId
+            ? {
+                ...conversation,
+                mutedBy: [
+                  ...(conversation.mutedBy || []),
+                  useAuthStore.getState().authUser._id,
+                ],
+              }
+            : conversation
+        ),
+      });
+      toast.success(res.data.message);
+    } catch (error) {
+      toast.error(formatError(error), { duration: 5000 });
+    } finally {
+      set({ loading: false });
+    }
+  },
+  unmuteConversation: async (conversationId) => {
+    set({ loading: true });
+    try {
+      const res = await axiosInstance.patch(
+        `/conversations/${conversationId}/unmute`
+      );
+      set({
+        conversations: get().conversations.map((conversation) =>
+          conversation._id === conversationId
+            ? {
+                ...conversation,
+                mutedBy: conversation.mutedBy.filter(
+                  (id) => id !== useAuthStore.getState().authUser._id
+                ),
+              }
+            : conversation
         ),
       });
       toast.success(res.data.message);

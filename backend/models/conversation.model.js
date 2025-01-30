@@ -23,6 +23,10 @@ const conversationSchema = new mongoose.Schema(
           type: Date,
           default: Date.now,
         },
+        addedBy: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+        },
         _id: false, // Don't create separate _id for each participant
       },
     ],
@@ -54,7 +58,6 @@ const conversationSchema = new mongoose.Schema(
       ref: "Message",
       default: null,
     },
-
     mutedBy: [
       {
         type: mongoose.Schema.Types.ObjectId,

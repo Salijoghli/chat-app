@@ -9,6 +9,7 @@ import {
   MessageCircleX,
 } from "lucide-react";
 import { useState, useRef, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import classNames from "classnames";
 
 export const Conversation = ({ conversation }) => {
@@ -28,6 +29,8 @@ export const Conversation = ({ conversation }) => {
 
   const deleteConversation = useChatStore((state) => state.deleteConversation);
   const leaveGroup = useChatStore((state) => state.leaveGroup);
+  const muteConversation = useChatStore((state) => state.muteConversation);
+  const unmuteConversation = useChatStore((state) => state.unmuteConversation);
 
   const dropdownRef = useRef(null);
   const [dropdownPosition, setDropdownPosition] = useState("");
@@ -37,6 +40,8 @@ export const Conversation = ({ conversation }) => {
   const isMuted = conversation.mutedBy.includes(authUser._id);
   const isGroup = conversation.type === "group";
 
+  const navigate = useNavigate();
+
   const actions = useMemo(
     () => [
       {
@@ -44,7 +49,7 @@ export const Conversation = ({ conversation }) => {
         label: "Mute Notifications",
         icon: BellOff,
         visible: !isMuted,
-        action: () => {},
+        action: () => muteConversation(conversation._id),
       },
 
       {
@@ -52,7 +57,7 @@ export const Conversation = ({ conversation }) => {
         label: "Unmute Notifications",
         icon: Bell,
         visible: isMuted,
-        action: () => {},
+        action: () => unmuteConversation(conversation._id),
       },
       {
         key: "delete",
@@ -66,7 +71,7 @@ export const Conversation = ({ conversation }) => {
         label: "View Profile",
         icon: User,
         visible: !isGroup,
-        action: () => {},
+        action: () => navigate(`/profile/${conversation.participants[0]._id}`),
       },
       {
         key: "leave",
@@ -76,7 +81,17 @@ export const Conversation = ({ conversation }) => {
         action: () => leaveGroup(conversation._id),
       },
     ],
-    [isGroup, isMuted, conversation._id, leaveGroup, deleteConversation]
+    [
+      isGroup,
+      isMuted,
+      conversation._id,
+      leaveGroup,
+      deleteConversation,
+      muteConversation,
+      unmuteConversation,
+      navigate,
+      conversation.participants,
+    ]
   );
 
   const conversations = useChatStore((state) => state.conversations);
@@ -138,9 +153,13 @@ export const Conversation = ({ conversation }) => {
         className={`dropdown dropdown-end ${dropdownPosition}`}
         onClick={(e) => e.stopPropagation()}
       >
-        <div tabIndex={0} role="button" className="btn">
-          <Ellipsis />
+        <div className="flex items-center gap-2">
+          {isMuted && <BellOff className="size-5" />}
+          <div tabIndex={0} role="button" className="btn rounded-full">
+            <Ellipsis className="size-5" />
+          </div>
         </div>
+
         <ul
           tabIndex={0}
           className="dropdown-content menu shadow-inner ring-1 ring-gray-200 bg-base-200 rounded-box z-[1] w-80"

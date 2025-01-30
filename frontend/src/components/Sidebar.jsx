@@ -3,7 +3,7 @@ import { useChatStore } from "../store/useChatStore";
 import { useFriendsStore } from "../store/useFriendsStore";
 import { useLayoutStore } from "../store/useLayoutStore";
 import { Conversation } from "./Conversation";
-import { MessageSquareMore } from "lucide-react";
+import { MessageSquareMore, Search } from "lucide-react";
 import classNames from "classnames";
 import { CreateConversationModal } from "./CreateConversationModal";
 export const Sidebar = () => {
@@ -24,14 +24,20 @@ export const Sidebar = () => {
     getConversations();
   }, [getConversations]);
 
-  const filteredConversations = conversations;
-
   const sidebarClasses = classNames(
     "h-full w-full max-w-md bg-base-200 flex flex-col transition-all duration-200 rounded-lg",
     {
       "hidden lg:flex": isChatInfoOpen || selectedConversation,
     }
   );
+
+  const [search, setSearch] = useState("");
+
+  const filteredConversations = conversations.filter((conversation) => {
+    return conversation.name
+      .toLowerCase()
+      .includes(search.toLowerCase().trim());
+  });
 
   return (
     <aside className={sidebarClasses}>
@@ -40,13 +46,24 @@ export const Sidebar = () => {
           <p className="text-2xl font-bold">Chats</p>
           <div className="tooltip tooltip-bottom" data-tip="Create new chat">
             <button
-              className="btn btn-sm btn-ghost"
+              className="btn btn-sm btn-ghost rounded-full"
               onClick={() => modalRef.current.showModal()}
             >
               <MessageSquareMore className="size-5" />
             </button>
           </div>
         </div>
+
+        <label className="input input-bordered flex items-center gap-2 mt-3 rounded-full">
+          <Search className="size-5" />
+          <input
+            type="text"
+            className="grow"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search conversations"
+          />
+        </label>
 
         <div className="flex mt-3 items-center gap-2">
           <label className="cursor-pointer flex items-center gap-2">
@@ -64,7 +81,7 @@ export const Sidebar = () => {
         </div>
       </div>
 
-      <div className="flex flex-col gap-2 overflow-y-auto h-screen">
+      <div className="flex flex-col overflow-y-auto h-screen">
         {filteredConversations.map((conversation) => (
           <Conversation key={conversation._id} conversation={conversation} />
         ))}
