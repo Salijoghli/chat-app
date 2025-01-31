@@ -17,8 +17,10 @@ export const NoChat = () => {
         </div>
 
         {/* Welcome Text */}
-        <h2 className="text-2xl font-bold">Welcome to Convo</h2>
-        <p className="text-base-content/60">
+        <h2 className="text-xl md:text-2xl lg:text-3xl font-bold">
+          Welcome to Convo
+        </h2>
+        <p className="text-sm md:text-base text-base-content/60">
           Select a conversation from the sidebar to start chatting
         </p>
       </div>

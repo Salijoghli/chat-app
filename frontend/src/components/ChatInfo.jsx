@@ -16,11 +16,11 @@ export const ChatInfo = () => {
   const [image, setImage] = useState(avatar);
 
   return (
-    <div className="w-full h-full bg-base-200 flex flex-col self-center">
+    <div className="w-full lg:max-w-96 h-full bg-base-200 flex flex-col rounded-lg m-auto">
       {/* Header */}
       <div className="relative p-4">
         <button
-          className="btn btn-ghost btn-circle m-4 absolute left-0 top-0 flex xl:hidden"
+          className="btn btn-ghost btn-circle absolute left-5 top-3 lg:hidden"
           onClick={() => toggleChatInfo()}
         >
           <MoveLeft className="size-6" />

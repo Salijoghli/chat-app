@@ -25,7 +25,7 @@ export const Sidebar = () => {
   }, [getConversations]);
 
   const sidebarClasses = classNames(
-    "h-full w-full max-w-md bg-base-200 flex flex-col transition-all duration-200 rounded-lg",
+    "h-full w-full max-w-md bg-base-200 flex flex-col rounded-lg",
     {
       "hidden lg:flex": isChatInfoOpen || selectedConversation,
     }

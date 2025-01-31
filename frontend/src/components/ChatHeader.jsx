@@ -28,10 +28,10 @@ export const ChatHeader = () => {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3 px-3">
           <button
-            className="btn btn-circle block lg:hidden"
+            className="btn btn-ghost btn-circle  lg:hidden"
             onClick={() => setSelectedConversation(null)}
           >
-            <MoveLeft />
+            <MoveLeft className="size-6" />
           </button>
           <button className="btn flex items-center gap-3">
             {/* Avatar */}
