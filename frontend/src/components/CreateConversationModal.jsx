@@ -40,11 +40,7 @@ export const CreateConversationModal = ({ modalRef }) => {
   };
 
   const handleCreateChat = useCallback(async () => {
-    const ids = selectedUsers.map((user) => user._id);
-    const participants = ids.reduce((acc, id) => {
-      acc.push({ userId: id });
-      return acc;
-    }, []);
+    const participants = selectedUsers.map((user) => user._id);
     const name =
       selectedUsers.length > 1
         ? selectedUsers.map((user) => user.username).join(", ")

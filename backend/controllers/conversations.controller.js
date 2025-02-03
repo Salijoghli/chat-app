@@ -14,14 +14,15 @@ export const getConversations = expressAsyncHandler(async (req, res) => {
   const conversations = await Conversation.find({
     participants: {
       $elemMatch: {
-        userId: user._id,
+        user: user._id,
       },
     },
     removedBy: { $nin: [user._id] }, // Exclude conversations removed by user
   })
     .populate("lastMessage")
-    .populate("participants.userId", "username profilePicture")
-    .select("-pinnedMessages -createdBy -removedBy -updatedAt -__v")
+    .populate("participants.user", "username profilePicture")
+    .populate("participants.addedBy", "username")
+    .select("-pinnedMessages -removedBy -updatedAt -__v")
     .sort("-updatedAt");
   res.status(200).json({
     success: true,
@@ -42,32 +43,15 @@ export const createConversation = expressAsyncHandler(async (req, res) => {
 
   const { participants, name } = req.body;
 
+  const areAllValid = participants.every((participant) =>
+    isValidId(participant)
+  );
+
+  if (!areAllValid) handleError(res, 400, "Invalid participant id.");
+
   const direct = participants.length === 1;
 
   const type = direct ? "direct" : "group";
-
-  // Convert participant userIds to ObjectId
-  const validParticipants = await Promise.all(
-    participants.map(async (participant) => {
-      if (!isValidId(participant.userId)) {
-        handleError(res, 400, `Invalid userId: ${participant.userId}.`);
-      }
-
-      const user = await User.findById(participant.userId);
-
-      if (!user)
-        handleError(
-          res,
-          404,
-          `User not found for userId: ${participant.userId}.`
-        );
-
-      return {
-        userId: new mongoose.Types.ObjectId(participant.userId),
-      };
-    })
-  );
-
   let avatar = "";
 
   // Check if the conversation already exists
@@ -76,8 +60,8 @@ export const createConversation = expressAsyncHandler(async (req, res) => {
       type,
       participants: {
         $all: [
-          { $elemMatch: { userId: userId } },
-          { $elemMatch: { userId: validParticipants[0].userId } },
+          { $elemMatch: { user: userId } },
+          { $elemMatch: { user: participants[0] } },
         ],
       },
     });
@@ -92,15 +76,24 @@ export const createConversation = expressAsyncHandler(async (req, res) => {
       });
     }
     // Get the avatar of the other user
-    const otherUser = validParticipants[0];
-    const user = await User.findById(otherUser.userId);
+    const otherUser = participants[0];
+    const user = await User.findById(otherUser);
     avatar = user?.profilePicture || "";
   }
+
+  const modifiedParticipants = participants.map((participant) => ({
+    user: participant,
+    addedBy: userId,
+    role: "member",
+  }));
 
   // Create the conversation
   const conversation = await Conversation.create({
     type,
-    participants: [...validParticipants, { userId, role: "admin" }],
+    participants: [
+      ...modifiedParticipants,
+      { user: userId, addedBy: userId, role: "admin" },
+    ],
     name,
     createdBy: userId,
     avatar,
@@ -126,7 +119,7 @@ export const deleteConversation = expressAsyncHandler(async (req, res) => {
 
   // Check if user is a participant in the conversation
   const isParticipant = conversation.participants.some((p) =>
-    p.userId.equals(userId)
+    p.user.equals(userId)
   );
   if (!isParticipant)
     handleError(res, 403, "You are not a participant in this conversation.");

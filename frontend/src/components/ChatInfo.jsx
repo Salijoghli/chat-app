@@ -6,6 +6,8 @@ import {
   Pin,
   Bell,
   Users,
+  CircleX,
+  Ellipsis,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useChatStore } from "../store/useChatStore";
@@ -24,7 +26,7 @@ export const ChatInfo = () => {
   const [image, setImage] = useState(avatar);
 
   return (
-    <div className="w-full lg:max-w-96 h-full bg-base-200 flex flex-col rounded-lg m-auto">
+    <div className="w-full lg:max-w-96 bg-base-200 flex flex-col rounded-lg m-auto overflow-y-auto h-full">
       {/* Header */}
       <div className="relative p-4">
         <button
@@ -73,6 +75,25 @@ export const ChatInfo = () => {
           </button>
           <span className="text-sm">Search</span>
         </div>
+        {type === "direct" ? (
+          <Link
+            to={`/profile/${participants[0].user._id}`}
+            className="flex flex-col gap-1 items-center justify-center"
+          >
+            <button className="btn btn-md btn-outline">
+              <UserRound className="size-5" />
+            </button>
+            <span className="text-sm">Profile</span>
+          </Link>
+        ) : (
+          <div className="flex flex-col gap-1 items-center justify-center">
+            <button className="btn btn-md btn-outline">
+              <CircleX className="size-5" />
+            </button>
+
+            <span className="text-sm">Leave</span>
+          </div>
+        )}
       </div>
 
       <button className="btn btn-ghost justify-start w-full gap-3">
@@ -83,42 +104,54 @@ export const ChatInfo = () => {
       {type === "group" && (
         <div
           tabIndex={0}
-          className="collapse collapse-arrow rounded-lg btn-ghost group"
+          className="collapse collapse-arrow rounded-lg btn-ghost group h-auto"
         >
           <input type="checkbox" />
-          <div className="collapse-title font-bold flex items-center gap-2">
+          <div className="collapse-title font-semibold flex items-center gap-3">
             <Users className="size-5" />
             <span>Chat Members</span>
           </div>
+
           <div className="collapse-content">
-            {participants.map((participant) => (
-              <div key={participant._id} className="">
-                <span>{participant.name}</span>
+            {participants.map(({ user, addedBy }) => (
+              <div
+                key={user._id}
+                className="flex items-center justify-between p-1"
+              >
+                <div className="flex items-center gap-3">
+                  <img
+                    src={user.profilePicture}
+                    alt={user.username}
+                    className="size-9 rounded-full overflow-hidden object-cover"
+                  />
+                  <div className="flex flex-col">
+                    <span>{user.username}</span>
+                    <span className="text-sm text-base-content/70">
+                      {user._id === selectedConversation.createdBy
+                        ? "Group Owner"
+                        : `Added by ${addedBy.username}`}
+                    </span>
+                  </div>
+                </div>
+
+                <button
+                  className="btn btn-ghost btn-sm dropdown dropdown-end tooltip tooltip-left"
+                  data-tip="Member options"
+                >
+                  <Ellipsis className="size-5" />
+                  <ul className="menu dropdown-content bg-base-200 rounded-box z-[1] w-72">
+                    <li>
+                      <a>Item 1</a>
+                    </li>
+                    <li>
+                      <a>Item 2</a>
+                    </li>
+                  </ul>
+                </button>
               </div>
             ))}
           </div>
         </div>
-      )}
-
-      {type === "direct" && (
-        <Link
-          to={`/profile/${participants[0]._id}`}
-          className="btn btn-ghost flex flex-col gap-2 h-auto py-4"
-        >
-          <div className="size-12 rounded-full bg-base-300 flex items-center justify-center">
-            <UserRound className="size-5" />
-          </div>
-          <span className="text-sm">Profile</span>
-        </Link>
-      )}
-
-      {type === "group" && (
-        <button className="btn btn-ghost flex flex-col gap-2 h-auto py-4">
-          <div className="size-12 rounded-full bg-base-300 flex items-center justify-center">
-            <UserRound className="size-5" />
-          </div>
-          <span className="text-sm">Leave Group</span>
-        </button>
       )}
     </div>
   );
