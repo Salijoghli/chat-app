@@ -19,9 +19,8 @@ export const getConversations = expressAsyncHandler(async (req, res) => {
     },
     removedBy: { $nin: [user._id] }, // Exclude conversations removed by user
   })
-    .populate({
-      path: "lastMessage",
-    })
+    .populate("lastMessage")
+    .populate("participants.userId", "username profilePicture")
     .select("-pinnedMessages -createdBy -removedBy -updatedAt -__v")
     .sort("-updatedAt");
   res.status(200).json({
